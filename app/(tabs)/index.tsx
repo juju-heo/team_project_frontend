@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScrollView, Text, View, TouchableOpacity } from 'react-native';
+import { ScrollView, Text, View, TouchableOpacity, Modal } from 'react-native';
 // 아이콘 사용을 위한 임포트 (expo-vector-icons)
 import { AntDesign, Feather, Ionicons } from '@expo/vector-icons';
 // 스타일 임포트
@@ -18,6 +18,9 @@ interface RankingItem {
 const HomeScreen = () => {
     // 사주 정보 펼침 상태
     const [isSajuExpanded, setIsSajuExpanded] = useState(false);
+    // 프로필 모달 상태
+    const [showProfileModal, setShowProfileModal] = useState(false);
+    const [selectedProfile, setSelectedProfile] = useState<RankingItem | null>(null);
     
     // 랭킹 데이터를 위한 더미 배열 (실제 데이터는 서버에서 받아와야 합니다)
     const rankingData = [
@@ -44,16 +47,24 @@ const HomeScreen = () => {
 
     // 개별 랭킹 카드를 렌더링하는 컴포넌트 함수
     const renderRankingCard = (item: RankingItem, index: number) => (
-        <View key={item.id} style={styles.rankingCard}>
+        <TouchableOpacity 
+            key={item.id} 
+            style={styles.rankingCard}
+            onPress={() => {
+                setSelectedProfile(item);
+                setShowProfileModal(true);
+            }}
+        >
             <Text style={styles.rankingNumber}>{index + 1}</Text>
-            {/* 현재는 사용자 아이콘으로 통일했습니다. */}
-            <Ionicons name={item.icon as any} size={36} color="#4CAF50" /> 
+            <View style={styles.rankingAvatar}>
+                <Text style={styles.rankingAvatarText}>{item.title.substring(0, 2)}</Text>
+            </View>
             <Text style={styles.rankingTitle} numberOfLines={1}>{item.title}</Text>
             <View style={styles.heartScore}>
                 <AntDesign name="heart" size={12} color="#E53935" />
                 <Text style={styles.scoreText}>{item.score.toLocaleString()}</Text>
             </View>
-        </View>
+        </TouchableOpacity>
     );
 
     return (
@@ -190,8 +201,14 @@ const HomeScreen = () => {
 
             {/* 하단 내비게이션 바 */}
             <View style={styles.bottomNav}>
-                <TouchableOpacity style={styles.navButton}>
-                    <Ionicons name="videocam-outline" size={30} color="#999" />
+                <TouchableOpacity 
+                    style={styles.navButton}
+                    onPress={() => setShowProfileModal(true)}
+                >
+                    <View style={styles.videoChatIcon}>
+                        <Ionicons name="videocam" size={24} color="#4CAF50" />
+                        <Ionicons name="chatbubble" size={16} color="#4CAF50" style={styles.chatOverlay} />
+                    </View>
                 </TouchableOpacity>
                 <TouchableOpacity 
                     style={styles.navButton}
@@ -206,6 +223,83 @@ const HomeScreen = () => {
                     <Ionicons name="person-circle-outline" size={30} color="#999" />
                 </TouchableOpacity>
             </View>
+
+            {/* 프로필 모달 */}
+            <Modal
+                visible={showProfileModal}
+                transparent={true}
+                animationType="slide"
+                onRequestClose={() => setShowProfileModal(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.profileModal}>
+                        <View style={styles.profileModalHeader}>
+                            <Text style={styles.profileModalTitle}>프로필</Text>
+                            <TouchableOpacity 
+                                onPress={() => setShowProfileModal(false)}
+                                style={styles.closeButton}
+                            >
+                                <Ionicons name="close" size={24} color="#333" />
+                            </TouchableOpacity>
+                        </View>
+                        
+                        <View style={styles.profileModalContent}>
+                            {/* 프로필 아바타 */}
+                            <View style={styles.profileAvatar}>
+                                <Ionicons name="person" size={60} color="#fff" />
+                            </View>
+                            
+                            {/* 사용자 정보 */}
+                            <Text style={styles.profileName}>
+                                {selectedProfile?.title || '사용자'}
+                            </Text>
+                            <Text style={styles.profileLocation}>서울시 · 24세</Text>
+                            
+                            {/* 하트 수 */}
+                            <View style={styles.profileStats}>
+                                <View style={styles.statItem}>
+                                    <AntDesign name="heart" size={16} color="#E53935" />
+                                    <Text style={styles.statText}>{selectedProfile?.score.toLocaleString() || '0'}</Text>
+                                </View>
+                                <View style={styles.statItem}>
+                                    <Ionicons name="person" size={16} color="#4CAF50" />
+                                    <Text style={styles.statText}>89</Text>
+                                </View>
+                            </View>
+                            
+                            {/* 자기소개 */}
+                            <View style={styles.aboutSection}>
+                                <Text style={styles.sectionTitle}>자기소개</Text>
+                                <Text style={styles.aboutText}>
+                                    안녕하세요! {selectedProfile?.title || '사용자'} 입니다 ✨ 랭킹에 올라서 정말 기뻐요! 여러분과 즐거운 대화 나누고 싶습니다. 많이 친해져요!
+                                </Text>
+                            </View>
+                            
+                            {/* 사주 키워드 */}
+                            <View style={styles.keywordsSection}>
+                                <Text style={styles.sectionTitle}>사주 키워드</Text>
+                                <View style={styles.keywordsContainer}>
+                                    <View style={styles.keywordTag}>
+                                        <Text style={styles.keywordText}>사랑</Text>
+                                    </View>
+                                    <View style={styles.keywordTag}>
+                                        <Text style={styles.keywordText}>열정</Text>
+                                    </View>
+                                    <View style={styles.keywordTag}>
+                                        <Text style={styles.keywordText}>기쁨</Text>
+                                    </View>
+                                </View>
+                            </View>
+                            
+                            {/* 친구 추가 버튼 */}
+                            <TouchableOpacity style={styles.addFriendButton}>
+                                <Ionicons name="person-add" size={20} color="#4CAF50" />
+                                <Text style={styles.addFriendText}>친구 추가</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 };

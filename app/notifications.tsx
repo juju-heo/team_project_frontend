@@ -150,7 +150,7 @@ const NotificationScreen = () => {
             case 'friend_request':
                 return <Ionicons name="person-add-outline" size={16} color="#4CAF50" />;
             case 'heart':
-                return <AntDesign name="hearto" size={16} color="#E53935" />;
+                return <AntDesign name="heart" size={16} color="#E53935" />;
             case 'message':
                 return <Ionicons name="chatbubble-outline" size={16} color="#2196F3" />;
             case 'system':

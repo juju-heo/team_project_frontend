@@ -213,6 +213,20 @@ const styles = StyleSheet.create({
         color: '#4CAF50',
         marginBottom: 5,
     },
+    rankingAvatar: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        backgroundColor: '#4CAF50',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 5,
+    },
+    rankingAvatarText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
     rankingTitle: {
         fontSize: 13,
         textAlign: 'center',
@@ -247,6 +261,140 @@ const styles = StyleSheet.create({
     navButton: {
         padding: 10,
         borderRadius: 25,
+    },
+    videoChatIcon: {
+        position: 'relative',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    chatOverlay: {
+        position: 'absolute',
+        bottom: -2,
+        right: -2,
+    },
+
+    // 프로필 모달 스타일
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'flex-end',
+    },
+    profileModal: {
+        backgroundColor: '#fff',
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        maxHeight: '80%',
+        paddingTop: 20,
+    },
+    profileModalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+        paddingBottom: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+    },
+    profileModalTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#333',
+    },
+    closeButton: {
+        padding: 5,
+    },
+    profileModalContent: {
+        padding: 20,
+        alignItems: 'center',
+    },
+    profileAvatar: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        backgroundColor: '#4CAF50',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 15,
+    },
+    profileName: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: 5,
+    },
+    profileLocation: {
+        fontSize: 16,
+        color: '#666',
+        marginBottom: 15,
+    },
+    profileStats: {
+        flexDirection: 'row',
+        marginBottom: 20,
+    },
+    statItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginHorizontal: 15,
+    },
+    statText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#333',
+        marginLeft: 5,
+    },
+    aboutSection: {
+        width: '100%',
+        marginBottom: 20,
+    },
+    sectionTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: 10,
+    },
+    aboutText: {
+        fontSize: 14,
+        color: '#666',
+        lineHeight: 20,
+    },
+    keywordsSection: {
+        width: '100%',
+        marginBottom: 20,
+    },
+    keywordsContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+    },
+    keywordTag: {
+        backgroundColor: '#fff',
+        borderWidth: 1,
+        borderColor: '#4CAF50',
+        borderRadius: 15,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        marginRight: 8,
+        marginBottom: 8,
+    },
+    keywordText: {
+        fontSize: 14,
+        color: '#4CAF50',
+        fontWeight: '500',
+    },
+    addFriendButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#f8f9fa',
+        borderRadius: 25,
+        paddingHorizontal: 20,
+        paddingVertical: 12,
+        width: '100%',
+        justifyContent: 'center',
+    },
+    addFriendText: {
+        fontSize: 16,
+        color: '#4CAF50',
+        fontWeight: '500',
+        marginLeft: 8,
     },
 });
 
