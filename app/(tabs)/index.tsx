@@ -21,6 +21,8 @@ const HomeScreen = () => {
     // 프로필 모달 상태
     const [showProfileModal, setShowProfileModal] = useState(false);
     const [selectedProfile, setSelectedProfile] = useState<RankingItem | null>(null);
+    // 랜덤 채팅/영상 선택 모달 상태
+    const [showRandomModal, setShowRandomModal] = useState(false);
     
     // 랭킹 데이터를 위한 더미 배열 (실제 데이터는 서버에서 받아와야 합니다)
     const rankingData = [
@@ -203,7 +205,7 @@ const HomeScreen = () => {
             <View style={styles.bottomNav}>
                 <TouchableOpacity 
                     style={styles.navButton}
-                    onPress={() => setShowProfileModal(true)}
+                    onPress={() => setShowRandomModal(true)}
                 >
                     <View style={styles.videoChatIcon}>
                         <Ionicons name="videocam" size={24} color="#4CAF50" />
@@ -224,14 +226,47 @@ const HomeScreen = () => {
                 </TouchableOpacity>
             </View>
 
+            {/* 랜덤 채팅/영상 선택 모달 */}
+            <Modal
+                visible={showRandomModal}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setShowRandomModal(false)}
+            >
+                <View style={styles.randomModalOverlay}>
+                    <View style={styles.randomModal}>
+                        <TouchableOpacity 
+                            style={styles.randomOption}
+                            onPress={() => {
+                                setShowRandomModal(false);
+                                // 랜덤 채팅 로직
+                            }}
+                        >
+                            <Ionicons name="chatbubble-outline" size={24} color="#4CAF50" />
+                            <Text style={styles.randomOptionText}>랜덤 채팅</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity 
+                            style={styles.randomOption}
+                            onPress={() => {
+                                setShowRandomModal(false);
+                                // 랜덤 영상 로직
+                            }}
+                        >
+                            <Ionicons name="videocam-outline" size={24} color="#4CAF50" />
+                            <Text style={styles.randomOptionText}>랜덤 영상</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+
             {/* 프로필 모달 */}
             <Modal
                 visible={showProfileModal}
                 transparent={true}
-                animationType="slide"
+                animationType="fade"
                 onRequestClose={() => setShowProfileModal(false)}
             >
-                <View style={styles.modalOverlay}>
+                <View style={styles.profileModalOverlay}>
                     <View style={styles.profileModal}>
                         <View style={styles.profileModalHeader}>
                             <Text style={styles.profileModalTitle}>프로필</Text>
@@ -292,10 +327,15 @@ const HomeScreen = () => {
                             </View>
                             
                             {/* 친구 추가 버튼 */}
-                            <TouchableOpacity style={styles.addFriendButton}>
-                                <Ionicons name="person-add" size={20} color="#4CAF50" />
-                                <Text style={styles.addFriendText}>친구 추가</Text>
-                            </TouchableOpacity>
+                            <View style={styles.actionButtonsContainer}>
+                                <TouchableOpacity style={styles.chatButton}>
+                                    <Ionicons name="chatbubble-outline" size={20} color="#4CAF50" />
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.addFriendButton}>
+                                    <Ionicons name="person-add" size={20} color="#4CAF50" />
+                                    <Text style={styles.addFriendText}>친구 추가</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
                     </View>
                 </View>

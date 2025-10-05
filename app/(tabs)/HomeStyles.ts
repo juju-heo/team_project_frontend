@@ -205,7 +205,18 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         width: width * 0.25, // 약 4개가 한 화면에 보이도록 너비 설정
         marginRight: 15,
-        paddingVertical: 5,
+        paddingVertical: 15,
+        paddingHorizontal: 10,
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 3.84,
+        elevation: 5,
     },
     rankingNumber: {
         fontSize: 16,
@@ -273,17 +284,49 @@ const styles = StyleSheet.create({
         right: -2,
     },
 
-    // 프로필 모달 스타일
-    modalOverlay: {
+    // 랜덤 채팅/영상 선택 모달 스타일
+    randomModalOverlay: {
         flex: 1,
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'flex-end',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    randomModal: {
+        backgroundColor: '#fff',
+        borderRadius: 16,
+        padding: 20,
+        width: '80%',
+        maxWidth: 300,
+    },
+    randomOption: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 15,
+        paddingHorizontal: 20,
+        borderRadius: 12,
+        backgroundColor: '#f8f9fa',
+        marginBottom: 10,
+    },
+    randomOptionText: {
+        fontSize: 16,
+        color: '#4CAF50',
+        fontWeight: '500',
+        marginLeft: 12,
+    },
+
+    // 프로필 모달 스타일
+    profileModalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     profileModal: {
         backgroundColor: '#fff',
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
+        borderRadius: 20,
         maxHeight: '80%',
+        width: '90%',
+        maxWidth: 400,
         paddingTop: 20,
     },
     profileModalHeader: {
@@ -380,6 +423,22 @@ const styles = StyleSheet.create({
         color: '#4CAF50',
         fontWeight: '500',
     },
+    actionButtonsContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        width: '100%',
+        justifyContent: 'space-between',
+    },
+    chatButton: {
+        backgroundColor: '#f8f9fa',
+        borderRadius: 25,
+        paddingHorizontal: 20,
+        paddingVertical: 12,
+        flex: 1,
+        marginRight: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
     addFriendButton: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -387,7 +446,7 @@ const styles = StyleSheet.create({
         borderRadius: 25,
         paddingHorizontal: 20,
         paddingVertical: 12,
-        width: '100%',
+        flex: 2,
         justifyContent: 'center',
     },
     addFriendText: {
