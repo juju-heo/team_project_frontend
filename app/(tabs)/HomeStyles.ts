@@ -1,0 +1,253 @@
+import { StyleSheet, Dimensions, StatusBar, Platform } from 'react-native';
+
+// 화면 폭을 기준으로 랭킹 카드 너비를 설정하기 위해 사용합니다.
+const { width } = Dimensions.get('window');
+
+// 상태 표시줄 높이를 안전하게 가져오는 함수
+const getStatusBarHeight = () => {
+    if (Platform.OS === 'android') {
+        return StatusBar.currentHeight || 0;
+    }
+    return 0;
+};
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#f9f9f9', // 전체 배경색
+        paddingTop: 0, // 상단 패딩 제거
+    },
+    scrollContent: {
+        paddingHorizontal: 20,
+        paddingBottom: 100, // 하단 내비게이션 바를 가리지 않도록 공간 확보
+    },
+    
+    // 헤더 스타일
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+        paddingTop: getStatusBarHeight() + 5, // 상태 표시줄 바로 아래
+        paddingBottom: 15,
+        backgroundColor: 'white',
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+    },
+    logoText: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#4CAF50',
+    },
+    headerIcons: {
+        flexDirection: 'row',
+    },
+    badge: {
+        position: 'absolute',
+        right: -5,
+        top: -5,
+        backgroundColor: '#E53935',
+        borderRadius: 10,
+        width: 18,
+        height: 18,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    badgeText: {
+        color: 'white',
+        fontSize: 10,
+        fontWeight: 'bold',
+    },
+
+    // 사주 정보 카드 스타일
+    sajuInfoCard: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: 'white',
+        borderRadius: 12,
+        padding: 15,
+        marginTop: 10, // 상단 마진 줄임
+        marginBottom: 15,
+        shadowColor: '#000', 
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
+    },
+    sajuInfoTop: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    sajuTextContainer: {
+        marginLeft: 10,
+    },
+    sajuInfoTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#333',
+    },
+    sajuInfoDetail: {
+        fontSize: 14,
+        color: '#777',
+    },
+
+    // 사주 정보 펼침 내용 스타일
+    sajuExpandedContent: {
+        backgroundColor: 'white',
+        borderRadius: 12,
+        padding: 20,
+        marginBottom: 15,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
+    },
+    sajuSection: {
+        marginBottom: 20,
+    },
+    sajuSectionTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: 10,
+    },
+    sajuPillars: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+    pillarItem: {
+        flex: 1,
+        alignItems: 'center',
+        paddingVertical: 10,
+        backgroundColor: '#F8F9FA',
+        borderRadius: 8,
+        marginHorizontal: 2,
+    },
+    pillarLabel: {
+        fontSize: 12,
+        color: '#666',
+        marginBottom: 4,
+    },
+    pillarValue: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: '#333',
+        textAlign: 'center',
+    },
+    fortuneItems: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+    },
+    fortuneItem: {
+        width: '48%',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        backgroundColor: '#F8F9FA',
+        borderRadius: 8,
+        marginBottom: 8,
+    },
+    fortuneLabel: {
+        fontSize: 14,
+        color: '#333',
+    },
+    fortuneStars: {
+        fontSize: 16,
+        color: '#FFD700',
+    },
+    todayMessage: {
+        backgroundColor: '#E8F5E8',
+        borderRadius: 8,
+        padding: 15,
+        marginTop: 10,
+    },
+    todayMessageText: {
+        fontSize: 14,
+        color: '#4CAF50',
+        lineHeight: 20,
+        textAlign: 'center',
+    },
+
+    // 랭킹 섹션 스타일
+    rankingSection: {
+        marginVertical: 10, 
+        backgroundColor: 'white',
+        borderRadius: 12,
+        paddingVertical: 15,
+        paddingLeft: 15,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
+    },
+    rankingHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 10,
+        paddingHorizontal: 5,
+    },
+    rankingHeaderText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginLeft: 8,
+        color: '#333',
+    },
+    rankingScroll: {
+        // 가로 스크롤 영역
+    },
+    rankingCard: {
+        alignItems: 'center',
+        width: width * 0.25, // 약 4개가 한 화면에 보이도록 너비 설정
+        marginRight: 15,
+        paddingVertical: 5,
+    },
+    rankingNumber: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#4CAF50',
+        marginBottom: 5,
+    },
+    rankingTitle: {
+        fontSize: 13,
+        textAlign: 'center',
+        marginTop: 5,
+        color: '#333',
+    },
+    heartScore: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 3,
+    },
+    scoreText: {
+        fontSize: 12,
+        color: '#E53935',
+        marginLeft: 4,
+        fontWeight: '500',
+    },
+    
+    // 하단 내비게이션 바 스타일
+    bottomNav: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        height: 60,
+        backgroundColor: 'white',
+        borderTopWidth: 1,
+        borderTopColor: '#eee',
+        position: 'absolute',
+        bottom: 0,
+        width: '100%',
+    },
+    navButton: {
+        padding: 10,
+        borderRadius: 25,
+    },
+});
+
+export default styles;
