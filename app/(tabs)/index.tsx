@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScrollView, Text, View, TouchableOpacity, Modal } from 'react-native';
+import { ScrollView, Text, View, TouchableOpacity } from 'react-native';
 // 아이콘 사용을 위한 임포트 (expo-vector-icons)
 import { AntDesign, Feather, Ionicons } from '@expo/vector-icons';
 // 스타일 임포트
@@ -53,8 +53,10 @@ const HomeScreen = () => {
             key={item.id} 
             style={styles.rankingCard}
             onPress={() => {
+                console.log('랭킹 카드 클릭:', item.title);
                 setSelectedProfile(item);
                 setShowProfileModal(true);
+                console.log('프로필 모달 상태:', showProfileModal);
             }}
         >
             <Text style={styles.rankingNumber}>{index + 1}</Text>
@@ -208,8 +210,8 @@ const HomeScreen = () => {
                     onPress={() => setShowRandomModal(true)}
                 >
                     <View style={styles.videoChatIcon}>
-                        <Ionicons name="videocam" size={24} color="#4CAF50" />
-                        <Ionicons name="chatbubble" size={16} color="#4CAF50" style={styles.chatOverlay} />
+                        <Ionicons name="videocam-outline" size={24} color="#4CAF50" />
+                        <Ionicons name="chatbubble-outline" size={16} color="#4CAF50" style={styles.chatOverlay} />
                     </View>
                 </TouchableOpacity>
                 <TouchableOpacity 
@@ -227,45 +229,29 @@ const HomeScreen = () => {
             </View>
 
             {/* 랜덤 채팅/영상 선택 모달 */}
-            <Modal
-                visible={showRandomModal}
-                transparent={true}
-                animationType="fade"
-                onRequestClose={() => setShowRandomModal(false)}
-            >
+            {showRandomModal && (
                 <View style={styles.randomModalOverlay}>
                     <View style={styles.randomModal}>
                         <TouchableOpacity 
                             style={styles.randomOption}
-                            onPress={() => {
-                                setShowRandomModal(false);
-                                // 랜덤 채팅 로직
-                            }}
+                            onPress={() => setShowRandomModal(false)}
                         >
                             <Ionicons name="chatbubble-outline" size={24} color="#4CAF50" />
                             <Text style={styles.randomOptionText}>랜덤 채팅</Text>
                         </TouchableOpacity>
                         <TouchableOpacity 
                             style={styles.randomOption}
-                            onPress={() => {
-                                setShowRandomModal(false);
-                                // 랜덤 영상 로직
-                            }}
+                            onPress={() => setShowRandomModal(false)}
                         >
                             <Ionicons name="videocam-outline" size={24} color="#4CAF50" />
                             <Text style={styles.randomOptionText}>랜덤 영상</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
-            </Modal>
+            )}
 
             {/* 프로필 모달 */}
-            <Modal
-                visible={showProfileModal}
-                transparent={true}
-                animationType="fade"
-                onRequestClose={() => setShowProfileModal(false)}
-            >
+            {showProfileModal && (
                 <View style={styles.profileModalOverlay}>
                     <View style={styles.profileModal}>
                         <View style={styles.profileModalHeader}>
@@ -339,7 +325,8 @@ const HomeScreen = () => {
                         </View>
                     </View>
                 </View>
-            </Modal>
+            )}
+
         </View>
     );
 };

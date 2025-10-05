@@ -209,14 +209,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         backgroundColor: '#fff',
         borderRadius: 12,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 3.84,
-        elevation: 5,
+        borderWidth: 1,
+        borderColor: '#4CAF50',
     },
     rankingNumber: {
         fontSize: 16,
@@ -286,10 +280,15 @@ const styles = StyleSheet.create({
 
     // 랜덤 채팅/영상 선택 모달 스타일
     randomModalOverlay: {
-        flex: 1,
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
         justifyContent: 'center',
         alignItems: 'center',
+        zIndex: 1000,
     },
     randomModal: {
         backgroundColor: '#fff',
@@ -297,6 +296,14 @@ const styles = StyleSheet.create({
         padding: 20,
         width: '80%',
         maxWidth: 300,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
     },
     randomOption: {
         flexDirection: 'row',
@@ -316,10 +323,15 @@ const styles = StyleSheet.create({
 
     // 프로필 모달 스타일
     profileModalOverlay: {
-        flex: 1,
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
         justifyContent: 'center',
         alignItems: 'center',
+        zIndex: 1000,
     },
     profileModal: {
         backgroundColor: '#fff',
@@ -423,6 +435,46 @@ const styles = StyleSheet.create({
         color: '#4CAF50',
         fontWeight: '500',
     },
+    
+    // 랜덤 모달 스타일들
+    randomModalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    randomModal: {
+        backgroundColor: '#fff',
+        borderRadius: 16,
+        padding: 20,
+        width: '80%',
+        maxWidth: 300,
+    },
+    randomOption: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 15,
+        paddingHorizontal: 20,
+        borderRadius: 12,
+        backgroundColor: '#f8f9fa',
+        marginBottom: 10,
+    },
+    randomOptionText: {
+        fontSize: 16,
+        color: '#4CAF50',
+        fontWeight: '500',
+        marginLeft: 12,
+    },
+    
+    // 프로필 모달 오버레이
+    profileModalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    
+    // 액션 버튼 컨테이너
     actionButtonsContainer: {
         flexDirection: 'row',
         alignItems: 'center',
