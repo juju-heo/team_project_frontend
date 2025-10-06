@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScrollView, Text, View, TouchableOpacity } from 'react-native';
+import { ScrollView, Text, View, TouchableOpacity, Modal } from 'react-native';
 // 아이콘 사용을 위한 임포트 (expo-vector-icons)
 import { AntDesign, Feather, Ionicons } from '@expo/vector-icons';
 // 스타일 임포트
@@ -21,6 +21,9 @@ const HomeScreen = () => {
     // 프로필 모달 상태
     const [showProfileModal, setShowProfileModal] = useState(false);
     const [selectedProfile, setSelectedProfile] = useState<RankingItem | null>(null);
+    const [isHeartLiked, setIsHeartLiked] = useState(false);
+    const [isFriendAdded, setIsFriendAdded] = useState(false);
+    const [showImageModal, setShowImageModal] = useState(false);
     // 랜덤 채팅/영상 선택 모달 상태
     const [showRandomModal, setShowRandomModal] = useState(false);
     
@@ -55,6 +58,8 @@ const HomeScreen = () => {
             onPress={() => {
                 console.log('랭킹 카드 클릭:', item.title);
                 setSelectedProfile(item);
+                setIsHeartLiked(false); // 하트 상태 초기화
+                setIsFriendAdded(false); // 친구 상태 초기화
                 setShowProfileModal(true);
                 console.log('프로필 모달 상태:', showProfileModal);
             }}
@@ -255,8 +260,7 @@ const HomeScreen = () => {
                             style={styles.dropdownOption}
                             onPress={() => {
                                 setShowRandomModal(false);
-                                // 랜덤 영상 기능 구현
-                                console.log('랜덤 영상 시작');
+                                router.push('/random-video-waiting');
                             }}
                         >
                             <Ionicons name="videocam-outline" size={20} color="#333" />
@@ -282,9 +286,12 @@ const HomeScreen = () => {
                         
                         <View style={styles.profileModalContent}>
                             {/* 프로필 아바타 */}
-                            <View style={styles.profileAvatar}>
+                            <TouchableOpacity 
+                                style={styles.profileAvatar}
+                                onPress={() => setShowImageModal(true)}
+                            >
                                 <Ionicons name="person" size={60} color="#fff" />
-                            </View>
+                            </TouchableOpacity>
                             
                             {/* 사용자 정보 */}
                             <Text style={styles.profileName}>
@@ -328,20 +335,77 @@ const HomeScreen = () => {
                                 </View>
                             </View>
                             
-                            {/* 친구 추가 버튼 */}
+                            {/* 좋아요 및 친구 관련 버튼 */}
                             <View style={styles.actionButtonsContainer}>
-                                <TouchableOpacity style={styles.chatButton}>
-                                    <Ionicons name="chatbubble-outline" size={20} color="#4CAF50" />
+                                <TouchableOpacity 
+                                    style={styles.heartButton}
+                                    onPress={() => setIsHeartLiked(!isHeartLiked)}
+                                >
+                                    <Ionicons 
+                                        name={isHeartLiked ? "heart" : "heart-outline"} 
+                                        size={20} 
+                                        color={isHeartLiked ? "#E53935" : "#4CAF50"} 
+                                    />
                                 </TouchableOpacity>
-                                <TouchableOpacity style={styles.addFriendButton}>
-                                    <Ionicons name="person-add" size={20} color="#4CAF50" />
-                                    <Text style={styles.addFriendText}>친구 추가</Text>
-                                </TouchableOpacity>
+                                
+                                {!isFriendAdded ? (
+                                    // 친구 추가 버튼
+                                    <TouchableOpacity 
+                                        style={styles.addFriendButton}
+                                        onPress={() => setIsFriendAdded(true)}
+                                    >
+                                        <Ionicons name="person-add" size={20} color="#4CAF50" />
+                                        <Text style={styles.addFriendText}>친구 추가</Text>
+                                    </TouchableOpacity>
+                                ) : (
+                                    // 친구 추가된 상태 - 채팅과 친구 삭제 버튼
+                                    <>
+                                        <TouchableOpacity style={styles.chatButton}>
+                                            <Ionicons name="chatbubble-outline" size={20} color="#4CAF50" />
+                                        </TouchableOpacity>
+                                        <TouchableOpacity 
+                                            style={styles.removeFriendButton}
+                                            onPress={() => setIsFriendAdded(false)}
+                                        >
+                                            <Ionicons name="person-remove" size={20} color="#E53935" />
+                                        </TouchableOpacity>
+                                    </>
+                                )}
                             </View>
                         </View>
                     </View>
                 </View>
             )}
+
+            {/* 이미지 확대 모달 */}
+            <Modal
+                visible={showImageModal}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setShowImageModal(false)}
+            >
+                <View style={styles.imageModalOverlay}>
+                    <TouchableOpacity 
+                        style={styles.imageModalCloseArea}
+                        onPress={() => setShowImageModal(false)}
+                    >
+                        <View style={styles.imageModalContent}>
+                            <TouchableOpacity 
+                                style={styles.imageModalCloseButton}
+                                onPress={() => setShowImageModal(false)}
+                            >
+                                <Ionicons name="close" size={30} color="#fff" />
+                            </TouchableOpacity>
+                            <View style={styles.expandedAvatar}>
+                                <Ionicons name="person" size={120} color="#fff" />
+                            </View>
+                            <Text style={styles.expandedAvatarText}>
+                                {selectedProfile?.title || '사용자'}
+                            </Text>
+                        </View>
+                    </TouchableOpacity>
+                </View>
+            </Modal>
 
         </View>
     );

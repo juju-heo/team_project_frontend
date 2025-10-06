@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScrollView, Text, View, TouchableOpacity, SafeAreaView } from 'react-native';
+import { ScrollView, Text, View, TouchableOpacity, SafeAreaView, Modal, Image } from 'react-native';
 import { AntDesign, Ionicons, Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import styles from '../src/style/NotificationStyles';
@@ -22,7 +22,22 @@ interface NotificationSection {
     badgeCount?: number;
 }
 
+// 프로필 데이터 타입 정의
+interface ProfileData {
+    id: number;
+    title: string;
+    score: number;
+    icon: string;
+}
+
 const NotificationScreen = () => {
+    // 프로필 모달 상태
+    const [showProfileModal, setShowProfileModal] = useState(false);
+    const [selectedProfile, setSelectedProfile] = useState<ProfileData | null>(null);
+    const [isHeartLiked, setIsHeartLiked] = useState(false);
+    const [isFriendAdded, setIsFriendAdded] = useState(false);
+    const [showImageModal, setShowImageModal] = useState(false);
+    
     const [notifications, setNotifications] = useState<NotificationSection[]>([
         {
             title: '친구 요청',
@@ -144,6 +159,20 @@ const NotificationScreen = () => {
         );
     };
 
+    // 프로필 클릭 핸들러
+    const handleProfileClick = (notification: NotificationItem) => {
+        const profileData: ProfileData = {
+            id: notification.id,
+            title: notification.username,
+            score: Math.floor(Math.random() * 10000) + 1000, // 랜덤 점수
+            icon: 'person'
+        };
+        setSelectedProfile(profileData);
+        setIsHeartLiked(false);
+        setIsFriendAdded(false);
+        setShowProfileModal(true);
+    };
+
     // 알림 아이콘 렌더링
     const renderNotificationIcon = (type: string) => {
         switch (type) {
@@ -182,9 +211,12 @@ const NotificationScreen = () => {
         return (
             <View key={notification.id} style={styles.notificationCard}>
                 <View style={styles.notificationContent}>
-                    <View style={styles.avatar}>
+                    <TouchableOpacity 
+                        style={styles.avatar}
+                        onPress={() => handleProfileClick(notification)}
+                    >
                         <Text style={styles.avatarText}>{notification.avatarText}</Text>
-                    </View>
+                    </TouchableOpacity>
                     <View style={styles.notificationInfo}>
                         <View style={styles.notificationHeader}>
                             <View style={styles.notificationIcon}>
@@ -253,6 +285,143 @@ const NotificationScreen = () => {
                     </View>
                 ))}
             </ScrollView>
+
+            {/* 프로필 모달 */}
+            {showProfileModal && (
+                <View style={styles.profileModalOverlay}>
+                    <View style={styles.profileModal}>
+                        <View style={styles.profileModalHeader}>
+                            <Text style={styles.profileModalTitle}>프로필</Text>
+                            <TouchableOpacity 
+                                onPress={() => setShowProfileModal(false)}
+                                style={styles.closeButton}
+                            >
+                                <Ionicons name="close" size={24} color="#333" />
+                            </TouchableOpacity>
+                        </View>
+                        
+                        <View style={styles.profileModalContent}>
+                            {/* 프로필 아바타 */}
+                            <TouchableOpacity 
+                                style={styles.profileAvatar}
+                                onPress={() => setShowImageModal(true)}
+                            >
+                                <Ionicons name="person" size={60} color="#fff" />
+                            </TouchableOpacity>
+                            
+                            {/* 사용자 정보 */}
+                            <Text style={styles.profileName}>
+                                {selectedProfile?.title || '사용자'}
+                            </Text>
+                            <Text style={styles.profileLocation}>서울시 · 24세</Text>
+                            
+                            {/* 하트 수 */}
+                            <View style={styles.profileStats}>
+                                <View style={styles.statItem}>
+                                    <AntDesign name="heart" size={16} color="#E53935" />
+                                    <Text style={styles.statText}>{selectedProfile?.score.toLocaleString() || '0'}</Text>
+                                </View>
+                                <View style={styles.statItem}>
+                                    <Ionicons name="person" size={16} color="#4CAF50" />
+                                    <Text style={styles.statText}>89</Text>
+                                </View>
+                            </View>
+                            
+                            {/* 자기소개 */}
+                            <View style={styles.aboutSection}>
+                                <Text style={styles.sectionTitle}>자기소개</Text>
+                                <Text style={styles.aboutText}>
+                                    안녕하세요! {selectedProfile?.title || '사용자'} 입니다 ✨ 랭킹에 올라서 정말 기뻐요! 여러분과 즐거운 대화 나누고 싶습니다. 많이 친해져요!
+                                </Text>
+                            </View>
+                            
+                            {/* 사주 키워드 */}
+                            <View style={styles.keywordsSection}>
+                                <Text style={styles.sectionTitle}>사주 키워드</Text>
+                                <View style={styles.keywordsContainer}>
+                                    <View style={styles.keywordTag}>
+                                        <Text style={styles.keywordText}>사랑</Text>
+                                    </View>
+                                    <View style={styles.keywordTag}>
+                                        <Text style={styles.keywordText}>열정</Text>
+                                    </View>
+                                    <View style={styles.keywordTag}>
+                                        <Text style={styles.keywordText}>기쁨</Text>
+                                    </View>
+                                </View>
+                            </View>
+                            
+                            {/* 좋아요 및 친구 관련 버튼 */}
+                            <View style={styles.actionButtonsContainer}>
+                                <TouchableOpacity 
+                                    style={styles.heartButton}
+                                    onPress={() => setIsHeartLiked(!isHeartLiked)}
+                                >
+                                    <Ionicons 
+                                        name={isHeartLiked ? "heart" : "heart-outline"} 
+                                        size={20} 
+                                        color={isHeartLiked ? "#E53935" : "#4CAF50"} 
+                                    />
+                                </TouchableOpacity>
+                                
+                                {!isFriendAdded ? (
+                                    // 친구 추가 버튼
+                                    <TouchableOpacity 
+                                        style={styles.addFriendButton}
+                                        onPress={() => setIsFriendAdded(true)}
+                                    >
+                                        <Ionicons name="person-add" size={20} color="#4CAF50" />
+                                        <Text style={styles.addFriendText}>친구 추가</Text>
+                                    </TouchableOpacity>
+                                ) : (
+                                    // 친구 추가된 상태 - 채팅과 친구 삭제 버튼
+                                    <>
+                                        <TouchableOpacity style={styles.chatButton}>
+                                            <Ionicons name="chatbubble-outline" size={20} color="#4CAF50" />
+                                        </TouchableOpacity>
+                                        <TouchableOpacity 
+                                            style={styles.removeFriendButton}
+                                            onPress={() => setIsFriendAdded(false)}
+                                        >
+                                            <Ionicons name="person-remove" size={20} color="#E53935" />
+                                        </TouchableOpacity>
+                                    </>
+                                )}
+                            </View>
+                        </View>
+                    </View>
+                </View>
+            )}
+
+            {/* 이미지 확대 모달 */}
+            <Modal
+                visible={showImageModal}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setShowImageModal(false)}
+            >
+                <View style={styles.imageModalOverlay}>
+                    <TouchableOpacity 
+                        style={styles.imageModalCloseArea}
+                        onPress={() => setShowImageModal(false)}
+                    >
+                        <View style={styles.imageModalContent}>
+                            <TouchableOpacity 
+                                style={styles.imageModalCloseButton}
+                                onPress={() => setShowImageModal(false)}
+                            >
+                                <Ionicons name="close" size={30} color="#fff" />
+                            </TouchableOpacity>
+                            <View style={styles.expandedAvatar}>
+                                <Ionicons name="person" size={120} color="#fff" />
+                            </View>
+                            <Text style={styles.expandedAvatarText}>
+                                {selectedProfile?.title || '사용자'}
+                            </Text>
+                        </View>
+                    </TouchableOpacity>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 };

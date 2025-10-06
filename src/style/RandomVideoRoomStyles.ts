@@ -1,204 +1,161 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
+
+const { width, height } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f8f9fa',
+        backgroundColor: '#000',
     },
-    header: {
-        flexDirection: 'row',
+    mainVideoContainer: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+    },
+    partnerVideo: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        justifyContent: 'center',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 20,
-        paddingVertical: 15,
-        backgroundColor: '#fff',
-        borderBottomWidth: 1,
-        borderBottomColor: '#e9ecef',
-        paddingTop: 50, // 상태바 높이 고려
+        backgroundColor: '#333',
     },
-    headerTitle: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#333',
-    },
-    backButton: {
-        padding: 5,
-    },
-    markAllReadButton: {
-        padding: 5,
-    },
-    markAllReadText: {
-        fontSize: 14,
-        color: '#4CAF50',
-        fontWeight: '500',
-    },
-    scrollContent: {
-        padding: 20,
-    },
-    notificationSection: {
-        marginBottom: 25,
-    },
-    sectionHeader: {
-        flexDirection: 'row',
+    partnerAvatar: {
+        width: 120,
+        height: 120,
+        borderRadius: 60,
+        backgroundColor: '#4CAF50',
+        justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 15,
+        marginBottom: 20,
     },
-    sectionTitle: {
+    partnerName: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#333',
-        marginLeft: 8,
-    },
-    notificationBadge: {
-        backgroundColor: '#4CAF50',
-        borderRadius: 10,
-        paddingHorizontal: 8,
-        paddingVertical: 2,
-        marginLeft: 8,
-    },
-    badgeText: {
         color: '#fff',
-        fontSize: 12,
-        fontWeight: 'bold',
     },
-    notificationCard: {
-        backgroundColor: '#fff',
+    myVideoContainer: {
+        position: 'absolute',
+        bottom: 120,
+        right: 20,
+        width: 120,
+        height: 160,
+    },
+    myVideo: {
+        flex: 1,
+        backgroundColor: '#666',
         borderRadius: 12,
-        padding: 15,
-        marginBottom: 10,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 3.84,
-        elevation: 5,
-    },
-    notificationContent: {
-        flexDirection: 'row',
+        justifyContent: 'center',
         alignItems: 'center',
     },
-    avatar: {
+    myAvatar: {
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        backgroundColor: '#4CAF50',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    compatibilityCard: {
+        position: 'absolute',
+        top: 20,
+        right: 20,
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        borderRadius: 12,
+        padding: 15,
+        minWidth: 120,
+    },
+    compatibilityHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
+    compatibilityTitle: {
+        fontSize: 12,
+        color: '#4CAF50',
+        marginLeft: 4,
+        fontWeight: '500',
+    },
+    compatibilityScore: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#FF6B6B',
+        textAlign: 'center',
+        marginBottom: 4,
+    },
+    compatibilityFooter: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    compatibilityRating: {
+        fontSize: 12,
+        color: '#fff',
+        marginRight: 4,
+    },
+    partnerProfileButton: {
+        position: 'absolute',
+        top: 20,
+        left: 20,
         width: 50,
         height: 50,
         borderRadius: 25,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    partnerProfileAvatar: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
         backgroundColor: '#4CAF50',
         justifyContent: 'center',
         alignItems: 'center',
-        marginRight: 12,
     },
-    avatarText: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    notificationInfo: {
-        flex: 1,
-    },
-    notificationHeader: {
+    controlsBar: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
         flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 4,
-    },
-    notificationIcon: {
-        marginRight: 6,
-    },
-    username: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#333',
-        marginRight: 6,
-    },
-    onlineDot: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        backgroundColor: '#4CAF50',
-    },
-    notificationMessage: {
-        fontSize: 14,
-        color: '#666',
-        marginBottom: 4,
-    },
-    notificationTime: {
-        fontSize: 12,
-        color: '#999',
-    },
-    actionButtons: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginLeft: 10,
-    },
-    actionButton: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
         justifyContent: 'center',
         alignItems: 'center',
-        marginLeft: 8,
+        paddingVertical: 20,
+        paddingHorizontal: 20,
+        paddingBottom: 30, // 하단 안전 영역 고려
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        gap: 20,
     },
-    acceptButton: {
-        backgroundColor: '#4CAF50',
-    },
-    declineButton: {
-        backgroundColor: '#f44336',
-    },
-    systemNotification: {
-        backgroundColor: '#fff',
-        borderRadius: 12,
-        padding: 15,
-        marginBottom: 10,
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 3.84,
-        elevation: 5,
-    },
-    systemNotificationContent: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    systemIcon: {
+    controlButton: {
         width: 50,
         height: 50,
         borderRadius: 25,
-        backgroundColor: '#2196F3',
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
         justifyContent: 'center',
         alignItems: 'center',
-        marginRight: 12,
     },
-    systemInfo: {
-        flex: 1,
+    controlButtonOff: {
+        backgroundColor: 'rgba(255, 255, 255, 0.3)',
     },
-    systemTitle: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#333',
-        marginBottom: 4,
-    },
-    systemMessage: {
-        fontSize: 14,
-        color: '#666',
-        marginBottom: 4,
-    },
-    systemTime: {
-        fontSize: 12,
-        color: '#999',
-    },
-    emptyState: {
-        flex: 1,
+    endCallButton: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        backgroundColor: '#E53935',
         justifyContent: 'center',
         alignItems: 'center',
-        paddingVertical: 50,
     },
-    emptyStateText: {
-        fontSize: 16,
-        color: '#999',
-        marginTop: 10,
+    reportButton: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 
     // 프로필 모달 스타일
@@ -367,51 +324,6 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-    },
-
-    // 이미지 확대 모달 스타일
-    imageModalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.9)',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    imageModalCloseArea: {
-        flex: 1,
-        width: '100%',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    imageModalContent: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        position: 'relative',
-        width: '100%',
-        height: '100%',
-    },
-    imageModalCloseButton: {
-        position: 'absolute',
-        top: 20,
-        right: 20,
-        zIndex: 1000,
-        backgroundColor: 'rgba(0, 0, 0, 0.7)',
-        borderRadius: 20,
-        padding: 10,
-    },
-    expandedAvatar: {
-        width: 200,
-        height: 200,
-        borderRadius: 100,
-        backgroundColor: '#4CAF50',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 20,
-    },
-    expandedAvatarText: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: '#fff',
-        textAlign: 'center',
     },
 });
 

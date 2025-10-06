@@ -445,7 +445,7 @@ const styles = StyleSheet.create({
         width: '100%',
         justifyContent: 'space-between',
     },
-    chatButton: {
+    heartButton: {
         backgroundColor: '#f8f9fa',
         borderRadius: 25,
         paddingHorizontal: 20,
@@ -470,6 +470,70 @@ const styles = StyleSheet.create({
         color: '#4CAF50',
         fontWeight: '500',
         marginLeft: 8,
+    },
+    chatButton: {
+        backgroundColor: '#f8f9fa',
+        borderRadius: 25,
+        paddingHorizontal: 20,
+        paddingVertical: 12,
+        flex: 1,
+        marginRight: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    removeFriendButton: {
+        backgroundColor: '#f8f9fa',
+        borderRadius: 25,
+        paddingHorizontal: 20,
+        paddingVertical: 12,
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+
+    // 이미지 확대 모달 스타일
+    imageModalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    imageModalCloseArea: {
+        flex: 1,
+        width: '100%',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    imageModalContent: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative',
+        width: '100%',
+        height: '100%',
+    },
+    imageModalCloseButton: {
+        position: 'absolute',
+        top: 20,
+        right: 20,
+        zIndex: 1000,
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        borderRadius: 20,
+        padding: 10,
+    },
+    expandedAvatar: {
+        width: 200,
+        height: 200,
+        borderRadius: 100,
+        backgroundColor: '#4CAF50',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    expandedAvatarText: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#fff',
+        textAlign: 'center',
     },
 });
 
