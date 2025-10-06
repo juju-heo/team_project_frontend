@@ -228,26 +228,42 @@ const HomeScreen = () => {
                 </TouchableOpacity>
             </View>
 
-            {/* 랜덤 채팅/영상 선택 모달 */}
+            {/* 랜덤 채팅/영상 선택 드롭다운 */}
             {showRandomModal && (
-                <View style={styles.randomModalOverlay}>
-                    <View style={styles.randomModal}>
+                <TouchableOpacity 
+                    style={styles.dropdownOverlay}
+                    activeOpacity={1}
+                    onPress={() => setShowRandomModal(false)}
+                >
+                    <TouchableOpacity 
+                        style={styles.dropdownMenu}
+                        activeOpacity={1}
+                        onPress={(e) => e.stopPropagation()}
+                    >
                         <TouchableOpacity 
-                            style={styles.randomOption}
-                            onPress={() => setShowRandomModal(false)}
+                            style={styles.dropdownOption}
+                            onPress={() => {
+                                setShowRandomModal(false);
+                                // 랜덤 채팅 기능 구현
+                                console.log('랜덤 채팅 시작');
+                            }}
                         >
-                            <Ionicons name="chatbubble-outline" size={24} color="#4CAF50" />
-                            <Text style={styles.randomOptionText}>랜덤 채팅</Text>
+                            <Ionicons name="chatbubble-outline" size={20} color="#333" />
+                            <Text style={styles.dropdownOptionText}>랜덤 채팅</Text>
                         </TouchableOpacity>
                         <TouchableOpacity 
-                            style={styles.randomOption}
-                            onPress={() => setShowRandomModal(false)}
+                            style={styles.dropdownOption}
+                            onPress={() => {
+                                setShowRandomModal(false);
+                                // 랜덤 영상 기능 구현
+                                console.log('랜덤 영상 시작');
+                            }}
                         >
-                            <Ionicons name="videocam-outline" size={24} color="#4CAF50" />
-                            <Text style={styles.randomOptionText}>랜덤 영상</Text>
+                            <Ionicons name="videocam-outline" size={20} color="#333" />
+                            <Text style={styles.dropdownOptionText}>랜덤 영상</Text>
                         </TouchableOpacity>
-                    </View>
-                </View>
+                    </TouchableOpacity>
+                </TouchableOpacity>
             )}
 
             {/* 프로필 모달 */}

@@ -278,24 +278,25 @@ const styles = StyleSheet.create({
         right: -2,
     },
 
-    // 랜덤 채팅/영상 선택 모달 스타일
-    randomModalOverlay: {
+    // 드롭다운 메뉴 스타일
+    dropdownOverlay: {
         position: 'absolute',
         top: 0,
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'center',
-        alignItems: 'center',
+        backgroundColor: 'transparent',
         zIndex: 1000,
+        justifyContent: 'flex-end',
+        alignItems: 'flex-start',
+        paddingBottom: 70, // 하단 네비게이션 바로 위
+        paddingLeft: 20, // 좌측 하단 아이콘 위치에 맞춤
     },
-    randomModal: {
+    dropdownMenu: {
         backgroundColor: '#fff',
-        borderRadius: 16,
-        padding: 20,
-        width: '80%',
-        maxWidth: 300,
+        borderRadius: 12,
+        paddingVertical: 8,
+        paddingHorizontal: 4,
         shadowColor: '#000',
         shadowOffset: {
             width: 0,
@@ -304,19 +305,20 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
         elevation: 5,
+        minWidth: 160,
     },
-    randomOption: {
+    dropdownOption: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: 15,
-        paddingHorizontal: 20,
-        borderRadius: 12,
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderRadius: 8,
         backgroundColor: '#f8f9fa',
-        marginBottom: 10,
+        marginVertical: 2,
     },
-    randomOptionText: {
+    dropdownOptionText: {
         fontSize: 16,
-        color: '#4CAF50',
+        color: '#333',
         fontWeight: '500',
         marginLeft: 12,
     },
@@ -434,44 +436,6 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#4CAF50',
         fontWeight: '500',
-    },
-    
-    // 랜덤 모달 스타일들
-    randomModalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    randomModal: {
-        backgroundColor: '#fff',
-        borderRadius: 16,
-        padding: 20,
-        width: '80%',
-        maxWidth: 300,
-    },
-    randomOption: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: 15,
-        paddingHorizontal: 20,
-        borderRadius: 12,
-        backgroundColor: '#f8f9fa',
-        marginBottom: 10,
-    },
-    randomOptionText: {
-        fontSize: 16,
-        color: '#4CAF50',
-        fontWeight: '500',
-        marginLeft: 12,
-    },
-    
-    // 프로필 모달 오버레이
-    profileModalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        justifyContent: 'center',
-        alignItems: 'center',
     },
     
     // 액션 버튼 컨테이너
