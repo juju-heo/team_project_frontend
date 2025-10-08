@@ -249,8 +249,8 @@ const HomeScreen = () => {
                             style={styles.dropdownOption}
                             onPress={() => {
                                 setShowRandomModal(false);
-                                // 랜덤 채팅 기능 구현
-                                console.log('랜덤 채팅 시작');
+                                // 랜덤 채팅 대기 화면으로 이동
+                                router.push('/random-chat-waiting');
                             }}
                         >
                             <Ionicons name="chatbubble-outline" size={20} color="#333" />
@@ -360,7 +360,20 @@ const HomeScreen = () => {
                                 ) : (
                                     // 친구 추가된 상태 - 채팅과 친구 삭제 버튼
                                     <>
-                                        <TouchableOpacity style={styles.chatButton}>
+                                        <TouchableOpacity 
+                                            style={styles.chatButton}
+                                            onPress={() => {
+                                                // 채팅방으로 이동
+                                                setShowProfileModal(false);
+                                                router.push({
+                                                    pathname: '/chat-room',
+                                                    params: {
+                                                        name: selectedProfile?.title || '사용자',
+                                                        avatar: selectedProfile?.title.substring(0, 2) || '사용자'
+                                                    }
+                                                });
+                                            }}
+                                        >
                                             <Ionicons name="chatbubble-outline" size={20} color="#4CAF50" />
                                         </TouchableOpacity>
                                         <TouchableOpacity 
