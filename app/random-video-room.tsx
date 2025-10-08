@@ -74,7 +74,6 @@ const RandomVideoRoomScreen = () => {
                 {/* 사주 궁합도 점수 (우측 상단) */}
                 <View style={styles.compatibilityCard}>
                     <View style={styles.compatibilityHeader}>
-                        <Ionicons name="refresh" size={16} color="#FFD700" />
                         <Text style={styles.compatibilityTitle}>사주 궁합도</Text>
                     </View>
                     <Text style={styles.compatibilityScore}>92점</Text>

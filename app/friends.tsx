@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
     ScrollView, 
     Text, 
@@ -7,11 +7,13 @@ import {
     SafeAreaView, 
     TextInput, 
     Modal,
-    Alert 
+    Alert,
+    FlatList 
 } from 'react-native';
 import { Ionicons, AntDesign } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import styles from '../src/style/FriendsListStyles';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // 친구 데이터 타입 정의
 interface Friend {
@@ -22,18 +24,7 @@ interface Friend {
 }
 
 const FriendsListScreen = () => {
-    const [friends, setFriends] = useState<Friend[]>([
-        { id: 1, name: '김민수', avatarText: '김민', isOnline: true },
-        { id: 2, name: '박지영', avatarText: '박지', isOnline: false },
-        { id: 3, name: '이동현', avatarText: '이동', isOnline: true },
-        { id: 4, name: '최수현', avatarText: '최수', isOnline: true },
-        { id: 5, name: '정다혜', avatarText: '정다', isOnline: false },
-        { id: 6, name: '오세준', avatarText: '오세', isOnline: true },
-        { id: 7, name: '한소영', avatarText: '한소', isOnline: false },
-        { id: 8, name: '윤태호', avatarText: '윤태', isOnline: true },
-        { id: 9, name: '강미래', avatarText: '강미', isOnline: false },
-        { id: 10, name: '송준호', avatarText: '송준', isOnline: true },
-    ]);
+    const [friends, setFriends] = useState<Friend[]>([]);
 
     const [searchQuery, setSearchQuery] = useState('');
     const [showAddFriendModal, setShowAddFriendModal] = useState(false);
@@ -45,7 +36,7 @@ const FriendsListScreen = () => {
     );
 
     // 친구 추가 함수
-    const addFriend = () => {
+    const addFriend = async () => {
         if (newFriendName.trim()) {
             const newFriend: Friend = {
                 id: friends.length + 1,
@@ -53,7 +44,9 @@ const FriendsListScreen = () => {
                 avatarText: newFriendName.trim().substring(0, 2),
                 isOnline: Math.random() > 0.5, // 랜덤으로 온라인 상태 설정
             };
-            setFriends([...friends, newFriend]);
+            const next = [...friends, newFriend];
+            setFriends(next);
+            await AsyncStorage.setItem('friends_list', JSON.stringify(next));
             setNewFriendName('');
             setShowAddFriendModal(false);
             Alert.alert('성공', '친구가 추가되었습니다!');
@@ -70,8 +63,10 @@ const FriendsListScreen = () => {
                 {
                     text: '삭제',
                     style: 'destructive',
-                    onPress: () => {
-                        setFriends(friends.filter(friend => friend.id !== friendId));
+                    onPress: async () => {
+                        const next = friends.filter(friend => friend.id !== friendId);
+                        setFriends(next);
+                        await AsyncStorage.setItem('friends_list', JSON.stringify(next));
                     }
                 }
             ]
@@ -80,17 +75,24 @@ const FriendsListScreen = () => {
 
     // 친구와 채팅 시작
     const startChat = (friend: Friend) => {
-        Alert.alert('채팅 시작', `${friend.name}님과 채팅을 시작합니다.`);
-        // 실제로는 채팅 화면으로 이동
-        // router.push(`/chat/${friend.id}`);
+        router.push(`/chat/${friend.id}?name=${encodeURIComponent(friend.name)}`);
     };
 
     // 개별 친구 아이템 렌더링
+    const [showProfileModal, setShowProfileModal] = useState(false);
+    const [selectedFriend, setSelectedFriend] = useState<Friend | null>(null);
+
+    const openFriend = (friend: Friend) => {
+        setSelectedFriend(friend);
+        setShowProfileModal(true);
+    };
+
     const renderFriendItem = (friend: Friend) => (
         <TouchableOpacity 
             key={friend.id} 
             style={styles.friendItem}
             onLongPress={() => removeFriend(friend.id)}
+            onPress={() => openFriend(friend)}
         >
             <View style={styles.friendAvatar}>
                 <Text style={styles.friendAvatarText}>{friend.avatarText}</Text>
@@ -115,6 +117,27 @@ const FriendsListScreen = () => {
             </TouchableOpacity>
         </TouchableOpacity>
     );
+
+    // 초기 로드 (저장된 친구 목록)
+    useEffect(() => {
+        (async () => {
+            try {
+                const stored = await AsyncStorage.getItem('friends_list');
+                if (stored) {
+                    setFriends(JSON.parse(stored));
+                } else {
+                    // 기본 샘플 데이터
+                    const seed: Friend[] = [
+                        { id: 1, name: '김민수', avatarText: '김민', isOnline: true },
+                        { id: 2, name: '박지영', avatarText: '박지', isOnline: false },
+                        { id: 3, name: '이동현', avatarText: '이동', isOnline: true },
+                    ];
+                    setFriends(seed);
+                    await AsyncStorage.setItem('friends_list', JSON.stringify(seed));
+                }
+            } catch {}
+        })();
+    }, []);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -174,19 +197,88 @@ const FriendsListScreen = () => {
                 </View>
 
                 {/* 친구 목록 */}
-                <ScrollView style={styles.friendsList} showsVerticalScrollIndicator={true}>
-                    {filteredFriends.length > 0 ? (
-                        filteredFriends.map(renderFriendItem)
-                    ) : (
-                        <View style={styles.emptyState}>
-                            <Ionicons name="people-outline" size={48} color="#ccc" />
-                            <Text style={styles.emptyStateText}>
-                                {searchQuery ? '검색 결과가 없습니다' : '친구가 없습니다'}
-                            </Text>
-                        </View>
-                    )}
-                </ScrollView>
+                {filteredFriends.length > 0 ? (
+                    <FlatList
+                        data={filteredFriends}
+                        keyExtractor={(f) => String(f.id)}
+                        renderItem={({ item }) => renderFriendItem(item)}
+                        style={styles.friendsList as any}
+                    />
+                ) : (
+                    <View style={styles.emptyState}>
+                        <Ionicons name="people-outline" size={48} color="#ccc" />
+                        <Text style={styles.emptyStateText}>
+                            {searchQuery ? '검색 결과가 없습니다' : '친구가 없습니다'}
+                        </Text>
+                    </View>
+                )}
             </View>
+
+            {/* 친구 프로필 팝업 */}
+            {showProfileModal && selectedFriend && (
+                <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 }}>
+                    <View style={{ width: '100%', maxWidth: 520, backgroundColor: '#fff', borderRadius: 16, padding: 20 }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Text style={{ fontSize: 18, fontWeight: '700', color: '#333' }}>프로필</Text>
+                            <TouchableOpacity onPress={() => setShowProfileModal(false)}>
+                                <Ionicons name="close" size={24} color="#333" />
+                            </TouchableOpacity>
+                        </View>
+
+                        <View style={{ alignItems: 'center', marginTop: 16 }}>
+                            <View style={{ width: 120, height: 120, borderRadius: 60, backgroundColor: '#34C759', justifyContent: 'center', alignItems: 'center', borderWidth: 3, borderColor: '#1e9f45' }}>
+                                <Text style={{ color: '#fff', fontSize: 24, fontWeight: '800' }}>{selectedFriend.avatarText}</Text>
+                            </View>
+                            <Text style={{ marginTop: 12, fontSize: 18, fontWeight: '700', color: '#333' }}>{selectedFriend.name}</Text>
+                            <Text style={{ marginTop: 4, fontSize: 14, color: '#777' }}>서울시 · 24세</Text>
+
+                            <View style={{ flexDirection: 'row', marginTop: 16 }}>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 28 }}>
+                                    <AntDesign name="heart" size={18} color="#E53935" />
+                                    <Text style={{ marginLeft: 6, color: '#E53935', fontWeight: '700' }}>1,245</Text>
+                                </View>
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    <Ionicons name="person" size={18} color="#25a244" />
+                                    <Text style={{ marginLeft: 6, color: '#25a244', fontWeight: '700' }}>89</Text>
+                                </View>
+                            </View>
+                        </View>
+
+                        <View style={{ marginTop: 18 }}>
+                            <Text style={{ fontSize: 16, fontWeight: '700', color: '#333', marginBottom: 8 }}>자기소개</Text>
+                            <View style={{ backgroundColor: '#EAF7EC', borderRadius: 12, padding: 12 }}>
+                                <Text style={{ color: '#333' }}>안녕하세요! {selectedFriend.name}입니다 😊 좋은 사람들과 함께 즐거운 시간을 보내고 싶어요. 많이 친해져요!</Text>
+                            </View>
+                        </View>
+
+                        <View style={{ marginTop: 18 }}>
+                            <Text style={{ fontSize: 16, fontWeight: '700', color: '#333', marginBottom: 8 }}>사주 키워드</Text>
+                            <View style={{ flexDirection: 'row' }}>
+                                {['친근함','신뢰','유머'].map((k) => (
+                                    <View key={k} style={{ backgroundColor: '#E8F5E8', borderRadius: 16, paddingHorizontal: 10, paddingVertical: 6, marginRight: 8 }}>
+                                        <Text style={{ color: '#25a244', fontWeight: '600' }}>{k}</Text>
+                                    </View>
+                                ))}
+                            </View>
+                        </View>
+
+                        <View style={{ marginTop: 18 }}>
+                            <TouchableOpacity onPress={() => { setShowProfileModal(false); startChat(selectedFriend); }} style={{ borderWidth: 1, borderColor: '#d6d6d6', borderRadius: 12, height: 44, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, justifyContent: 'center', marginBottom: 10 }}>
+                                <Ionicons name="chatbubble-ellipses-outline" size={18} color="#333" />
+                                <Text style={{ marginLeft: 8, fontSize: 16, color: '#333' }}>채팅하기</Text>
+                            </TouchableOpacity>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                <TouchableOpacity onPress={() => { setShowProfileModal(false); router.push('/report'); }} style={{ flex: 1, borderWidth: 1, borderColor: '#f1c0c0', borderRadius: 12, height: 42, alignItems: 'center', justifyContent: 'center', marginRight: 6 }}>
+                                    <Text style={{ color: '#E53935' }}>신고</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => { setShowProfileModal(false); router.push('/blocked'); }} style={{ flex: 1, borderWidth: 1, borderColor: '#ddd', borderRadius: 12, height: 42, alignItems: 'center', justifyContent: 'center', marginLeft: 6 }}>
+                                    <Text style={{ color: '#333' }}>차단 관리</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </View>
+            )}
 
             {/* 친구 추가 모달 */}
             <Modal
