@@ -126,19 +126,8 @@ const RandomVideoWaitingScreen = () => {
                     </View>
                 </View>
 
-                {/* 카메라/마이크 컨트롤 */}
+                {/* 마이크/카메라 컨트롤 */}
                 <View style={styles.controlsContainer}>
-                    <TouchableOpacity 
-                        style={[styles.controlButton, !isCameraOn && styles.controlButtonOff]}
-                        onPress={toggleCamera}
-                    >
-                        <Ionicons 
-                            name={isCameraOn ? "videocam" : "videocam-off"} 
-                            size={24} 
-                            color={isCameraOn ? "#4CAF50" : "#999"} 
-                        />
-                    </TouchableOpacity>
-                    
                     <TouchableOpacity 
                         style={[styles.controlButton, !isMicrophoneOn && styles.controlButtonOff]}
                         onPress={toggleMicrophone}
@@ -147,6 +136,17 @@ const RandomVideoWaitingScreen = () => {
                             name={isMicrophoneOn ? "mic" : "mic-off"} 
                             size={24} 
                             color={isMicrophoneOn ? "#4CAF50" : "#999"} 
+                        />
+                    </TouchableOpacity>
+                    
+                    <TouchableOpacity 
+                        style={[styles.controlButton, !isCameraOn && styles.controlButtonOff]}
+                        onPress={toggleCamera}
+                    >
+                        <Ionicons 
+                            name={isCameraOn ? "videocam" : "videocam-off"} 
+                            size={24} 
+                            color={isCameraOn ? "#4CAF50" : "#999"} 
                         />
                     </TouchableOpacity>
                 </View>

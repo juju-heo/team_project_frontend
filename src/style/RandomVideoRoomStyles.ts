@@ -70,15 +70,14 @@ const styles = StyleSheet.create({
         minWidth: 120,
     },
     compatibilityHeader: {
-        flexDirection: 'row',
         alignItems: 'center',
         marginBottom: 8,
     },
     compatibilityTitle: {
         fontSize: 12,
         color: '#4CAF50',
-        marginLeft: 4,
         fontWeight: '500',
+        textAlign: 'center',
     },
     compatibilityScore: {
         fontSize: 24,
