@@ -131,6 +131,24 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '500',
     },
+    // 신고하기 버튼
+    reportButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#fff',
+        paddingHorizontal: 20,
+        paddingVertical: 15,
+        borderRadius: 25,
+        borderWidth: 1,
+        borderColor: '#FF9800',
+        gap: 8,
+    },
+    // 신고하기 버튼 텍스트
+    reportButtonText: {
+        color: '#FF9800',
+        fontSize: 16,
+        fontWeight: '500',
+    },
 });
 
 export default styles;

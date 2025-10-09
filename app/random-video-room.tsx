@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Image } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { View, Text, TouchableOpacity, Image, Modal } from 'react-native';
+import { Ionicons, AntDesign } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import styles from '../src/style/RandomVideoRoomStyles';
+import ImageModal from '../components/ImageModal';
 
 // 프로필 데이터 타입 정의
 interface ProfileData {
@@ -18,6 +19,9 @@ const RandomVideoRoomScreen = () => {
     const [showProfileModal, setShowProfileModal] = useState(false);
     const [isHeartLiked, setIsHeartLiked] = useState(false);
     const [isFriendAdded, setIsFriendAdded] = useState(false);
+    const [showImageModal, setShowImageModal] = useState(false);
+    const [showReportModal, setShowReportModal] = useState(false);
+    const [showExitConfirmModal, setShowExitConfirmModal] = useState(false);
 
     // 상대방 프로필 데이터
     const partnerProfile: ProfileData = {
@@ -28,7 +32,16 @@ const RandomVideoRoomScreen = () => {
     };
 
     const handleEndCall = () => {
+        setShowExitConfirmModal(true);
+    };
+
+    const confirmExit = () => {
+        setShowExitConfirmModal(false);
         router.push('/random-video-end');
+    };
+
+    const cancelExit = () => {
+        setShowExitConfirmModal(false);
     };
 
     const toggleCamera = () => {
@@ -46,8 +59,7 @@ const RandomVideoRoomScreen = () => {
     };
 
     const handleReport = () => {
-        // 신고 기능 구현
-        console.log('신고하기');
+        setShowReportModal(true);
     };
 
     return (
@@ -112,7 +124,10 @@ const RandomVideoRoomScreen = () => {
                             {/* 프로필 아바타 */}
                             <TouchableOpacity 
                                 style={styles.profileAvatar}
-                                onPress={() => setShowImageModal(true)}
+                                onPress={() => {
+                                    setShowProfileModal(false);
+                                    setShowImageModal(true);
+                                }}
                             >
                                 <Ionicons name="person" size={60} color="#fff" />
                             </TouchableOpacity>
@@ -243,6 +258,189 @@ const RandomVideoRoomScreen = () => {
                     <Ionicons name="flag" size={24} color="#FF9800" />
                 </TouchableOpacity>
             </View>
+
+            {/* 이미지 확대 모달 */}
+            <ImageModal
+                visible={showImageModal}
+                onClose={() => setShowImageModal(false)}
+                imageUri={null}
+                userName={partnerProfile.title}
+            />
+
+            {/* 신고 모달 */}
+            <Modal
+                visible={showReportModal}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setShowReportModal(false)}
+            >
+                <View style={{
+                    flex: 1,
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    paddingHorizontal: 20
+                }}>
+                    <View style={{
+                        backgroundColor: '#fff',
+                        borderRadius: 16,
+                        padding: 20,
+                        width: '100%',
+                        maxWidth: 300
+                    }}>
+                        <Text style={{
+                            fontSize: 18,
+                            fontWeight: 'bold',
+                            color: '#333',
+                            textAlign: 'center',
+                            marginBottom: 20
+                        }}>
+                            사용자 신고
+                        </Text>
+                        
+                        <Text style={{
+                            fontSize: 14,
+                            color: '#666',
+                            textAlign: 'center',
+                            marginBottom: 20,
+                            lineHeight: 20
+                        }}>
+                            이 사용자를 신고하시겠습니까?
+                        </Text>
+                        
+                        <View style={{
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            gap: 10
+                        }}>
+                            <TouchableOpacity
+                                style={{
+                                    flex: 1,
+                                    backgroundColor: '#f5f5f5',
+                                    paddingVertical: 12,
+                                    borderRadius: 8,
+                                    alignItems: 'center'
+                                }}
+                                onPress={() => setShowReportModal(false)}
+                            >
+                                <Text style={{
+                                    color: '#666',
+                                    fontWeight: '600'
+                                }}>
+                                    취소
+                                </Text>
+                            </TouchableOpacity>
+                            
+                            <TouchableOpacity
+                                style={{
+                                    flex: 1,
+                                    backgroundColor: '#E53935',
+                                    paddingVertical: 12,
+                                    borderRadius: 8,
+                                    alignItems: 'center'
+                                }}
+                                onPress={() => {
+                                    setShowReportModal(false);
+                                    router.push('/report');
+                                }}
+                            >
+                                <Text style={{
+                                    color: '#fff',
+                                    fontWeight: '600'
+                                }}>
+                                    신고하기
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* 나가기 확인 모달 */}
+            <Modal
+                visible={showExitConfirmModal}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={cancelExit}
+            >
+                <View style={{
+                    flex: 1,
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    paddingHorizontal: 20
+                }}>
+                    <View style={{
+                        backgroundColor: '#fff',
+                        borderRadius: 16,
+                        padding: 20,
+                        width: '100%',
+                        maxWidth: 300
+                    }}>
+                        <Text style={{
+                            fontSize: 18,
+                            fontWeight: 'bold',
+                            color: '#333',
+                            textAlign: 'center',
+                            marginBottom: 20
+                        }}>
+                            통화 종료
+                        </Text>
+                        
+                        <Text style={{
+                            fontSize: 14,
+                            color: '#666',
+                            textAlign: 'center',
+                            marginBottom: 20,
+                            lineHeight: 20
+                        }}>
+                            정말로 통화를 종료하시겠습니까?
+                        </Text>
+                        
+                        <View style={{
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            gap: 10
+                        }}>
+                            <TouchableOpacity
+                                style={{
+                                    flex: 1,
+                                    backgroundColor: '#f5f5f5',
+                                    paddingVertical: 12,
+                                    borderRadius: 8,
+                                    alignItems: 'center'
+                                }}
+                                onPress={cancelExit}
+                            >
+                                <Text style={{
+                                    color: '#666',
+                                    fontWeight: '600'
+                                }}>
+                                    아니오
+                                </Text>
+                            </TouchableOpacity>
+                            
+                            <TouchableOpacity
+                                style={{
+                                    flex: 1,
+                                    backgroundColor: '#E53935',
+                                    paddingVertical: 12,
+                                    borderRadius: 8,
+                                    alignItems: 'center'
+                                }}
+                                onPress={confirmExit}
+                            >
+                                <Text style={{
+                                    color: '#fff',
+                                    fontWeight: '600'
+                                }}>
+                                    예
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </View>
     );
 };

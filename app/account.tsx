@@ -1,17 +1,9 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, SafeAreaView, TextInput, Alert, Image, ScrollView } from 'react-native';
+import React from 'react';
+import { View, Text, TouchableOpacity, SafeAreaView, TextInput, Alert, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
 export default function AccountScreen() {
-    const [nickname, setNickname] = useState('나만의별명');
-    const [bio, setBio] = useState('안녕하세요! 반가워요 😊');
-    const [age, setAge] = useState('25');
-    const [location, setLocation] = useState('서울시 강남구');
-
-    const saveProfile = () => {
-        Alert.alert('저장됨', '프로필 정보가 저장되었습니다.');
-    };
 
     const changePassword = () => {
         Alert.alert('안내', '비밀번호 변경 플로우를 연결해주세요.');
@@ -42,29 +34,6 @@ export default function AccountScreen() {
             </View>
 
             <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
-                {/* 프로필 정보 */}
-                <Card title="프로필 정보" icon="person-outline">
-                    {/* 아바타 */}
-                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
-                        <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: '#4CAF50', justifyContent: 'center', alignItems: 'center' }}>
-                            <Ionicons name="person" size={40} color="#fff" />
-                        </View>
-                        <View style={{ marginLeft: 12 }}>
-                            <RowGhost title="사진 변경" />
-                            <RowGhost title="사진 삭제" destructive />
-                        </View>
-                    </View>
-
-                    {/* 입력들 */}
-                    <LabeledInput label="닉네임" value={nickname} onChangeText={setNickname} />
-                    <LabeledInput label="소개" value={bio} onChangeText={setBio} />
-                    <LabeledInput label="나이" value={age} onChangeText={setAge} keyboardType="number-pad" />
-                    <LabeledInput label="지역" value={location} onChangeText={setLocation} />
-
-                    <TouchableOpacity onPress={saveProfile} style={{ backgroundColor: '#4CAF50', padding: 12, borderRadius: 12, alignItems: 'center', marginTop: 8 }}>
-                        <Text style={{ color: '#fff', fontWeight: '700' }}>프로필 저장</Text>
-                    </TouchableOpacity>
-                </Card>
 
                 {/* 계정 정보 */}
                 <Card title="계정 정보" icon="shield-checkmark-outline">

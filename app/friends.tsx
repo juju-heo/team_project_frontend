@@ -14,6 +14,7 @@ import { Ionicons, AntDesign } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import styles from '../src/style/FriendsListStyles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import ImageModal from '../components/ImageModal';
 
 // 친구 데이터 타입 정의
 interface Friend {
@@ -30,9 +31,16 @@ const FriendsListScreen = () => {
     const [showAddFriendModal, setShowAddFriendModal] = useState(false);
     const [newFriendName, setNewFriendName] = useState('');
 
-    // 검색 필터링된 친구 목록
-    const filteredFriends = friends.filter(friend =>
-        friend.name.toLowerCase().includes(searchQuery.toLowerCase())
+    // 친구 목록을 가나다 순으로 정렬하는 함수
+    const sortFriendsByName = (friendsList: Friend[]) => {
+        return friendsList.sort((a, b) => a.name.localeCompare(b.name, 'ko-KR'));
+    };
+
+    // 검색 필터링된 친구 목록 (가나다 순으로 정렬)
+    const filteredFriends = sortFriendsByName(
+        friends.filter(friend =>
+            friend.name.toLowerCase().includes(searchQuery.toLowerCase())
+        )
     );
 
     // 친구 추가 함수
@@ -44,7 +52,7 @@ const FriendsListScreen = () => {
                 avatarText: newFriendName.trim().substring(0, 2),
                 isOnline: Math.random() > 0.5, // 랜덤으로 온라인 상태 설정
             };
-            const next = [...friends, newFriend];
+            const next = sortFriendsByName([...friends, newFriend]);
             setFriends(next);
             await AsyncStorage.setItem('friends_list', JSON.stringify(next));
             setNewFriendName('');
@@ -64,7 +72,7 @@ const FriendsListScreen = () => {
                     text: '삭제',
                     style: 'destructive',
                     onPress: async () => {
-                        const next = friends.filter(friend => friend.id !== friendId);
+                        const next = sortFriendsByName(friends.filter(friend => friend.id !== friendId));
                         setFriends(next);
                         await AsyncStorage.setItem('friends_list', JSON.stringify(next));
                     }
@@ -81,9 +89,14 @@ const FriendsListScreen = () => {
     // 개별 친구 아이템 렌더링
     const [showProfileModal, setShowProfileModal] = useState(false);
     const [selectedFriend, setSelectedFriend] = useState<Friend | null>(null);
+    const [isHeartLiked, setIsHeartLiked] = useState(false);
+    const [isFriendAdded, setIsFriendAdded] = useState(true); // 친구목록에서는 이미 친구이므로 true
+    const [showImageModal, setShowImageModal] = useState(false);
 
     const openFriend = (friend: Friend) => {
         setSelectedFriend(friend);
+        setIsHeartLiked(false); // 하트 상태 초기화
+        setIsFriendAdded(true); // 친구 상태 초기화
         setShowProfileModal(true);
     };
 
@@ -124,7 +137,8 @@ const FriendsListScreen = () => {
             try {
                 const stored = await AsyncStorage.getItem('friends_list');
                 if (stored) {
-                    setFriends(JSON.parse(stored));
+                    const parsedFriends = JSON.parse(stored);
+                    setFriends(sortFriendsByName(parsedFriends));
                 } else {
                     // 기본 샘플 데이터
                     const seed: Friend[] = [
@@ -132,8 +146,9 @@ const FriendsListScreen = () => {
                         { id: 2, name: '박지영', avatarText: '박지', isOnline: false },
                         { id: 3, name: '이동현', avatarText: '이동', isOnline: true },
                     ];
-                    setFriends(seed);
-                    await AsyncStorage.setItem('friends_list', JSON.stringify(seed));
+                    const sortedSeed = sortFriendsByName(seed);
+                    setFriends(sortedSeed);
+                    await AsyncStorage.setItem('friends_list', JSON.stringify(sortedSeed));
                 }
             } catch {}
         })();
@@ -214,66 +229,247 @@ const FriendsListScreen = () => {
                 )}
             </View>
 
-            {/* 친구 프로필 팝업 */}
+            {/* 친구 프로필 모달 */}
             {showProfileModal && selectedFriend && (
-                <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 }}>
-                    <View style={{ width: '100%', maxWidth: 520, backgroundColor: '#fff', borderRadius: 16, padding: 20 }}>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Text style={{ fontSize: 18, fontWeight: '700', color: '#333' }}>프로필</Text>
-                            <TouchableOpacity onPress={() => setShowProfileModal(false)}>
+                <View style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    zIndex: 1000,
+                }}>
+                    <View style={{
+                        backgroundColor: '#fff',
+                        borderRadius: 20,
+                        maxHeight: '80%',
+                        width: '90%',
+                        maxWidth: 400,
+                        paddingTop: 20,
+                    }}>
+                        <View style={{
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            paddingHorizontal: 20,
+                            paddingBottom: 20,
+                            borderBottomWidth: 1,
+                            borderBottomColor: '#eee',
+                        }}>
+                            <Text style={{
+                                fontSize: 20,
+                                fontWeight: 'bold',
+                                color: '#333',
+                            }}>프로필</Text>
+                            <TouchableOpacity 
+                                onPress={() => setShowProfileModal(false)}
+                                style={{ padding: 5 }}
+                            >
                                 <Ionicons name="close" size={24} color="#333" />
                             </TouchableOpacity>
                         </View>
-
-                        <View style={{ alignItems: 'center', marginTop: 16 }}>
-                            <View style={{ width: 120, height: 120, borderRadius: 60, backgroundColor: '#34C759', justifyContent: 'center', alignItems: 'center', borderWidth: 3, borderColor: '#1e9f45' }}>
-                                <Text style={{ color: '#fff', fontSize: 24, fontWeight: '800' }}>{selectedFriend.avatarText}</Text>
-                            </View>
-                            <Text style={{ marginTop: 12, fontSize: 18, fontWeight: '700', color: '#333' }}>{selectedFriend.name}</Text>
-                            <Text style={{ marginTop: 4, fontSize: 14, color: '#777' }}>서울시 · 24세</Text>
-
-                            <View style={{ flexDirection: 'row', marginTop: 16 }}>
-                                <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 28 }}>
-                                    <AntDesign name="heart" size={18} color="#E53935" />
-                                    <Text style={{ marginLeft: 6, color: '#E53935', fontWeight: '700' }}>1,245</Text>
-                                </View>
-                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                    <Ionicons name="person" size={18} color="#25a244" />
-                                    <Text style={{ marginLeft: 6, color: '#25a244', fontWeight: '700' }}>89</Text>
-                                </View>
-                            </View>
-                        </View>
-
-                        <View style={{ marginTop: 18 }}>
-                            <Text style={{ fontSize: 16, fontWeight: '700', color: '#333', marginBottom: 8 }}>자기소개</Text>
-                            <View style={{ backgroundColor: '#EAF7EC', borderRadius: 12, padding: 12 }}>
-                                <Text style={{ color: '#333' }}>안녕하세요! {selectedFriend.name}입니다 😊 좋은 사람들과 함께 즐거운 시간을 보내고 싶어요. 많이 친해져요!</Text>
-                            </View>
-                        </View>
-
-                        <View style={{ marginTop: 18 }}>
-                            <Text style={{ fontSize: 16, fontWeight: '700', color: '#333', marginBottom: 8 }}>사주 키워드</Text>
-                            <View style={{ flexDirection: 'row' }}>
-                                {['친근함','신뢰','유머'].map((k) => (
-                                    <View key={k} style={{ backgroundColor: '#E8F5E8', borderRadius: 16, paddingHorizontal: 10, paddingVertical: 6, marginRight: 8 }}>
-                                        <Text style={{ color: '#25a244', fontWeight: '600' }}>{k}</Text>
-                                    </View>
-                                ))}
-                            </View>
-                        </View>
-
-                        <View style={{ marginTop: 18 }}>
-                            <TouchableOpacity onPress={() => { setShowProfileModal(false); startChat(selectedFriend); }} style={{ borderWidth: 1, borderColor: '#d6d6d6', borderRadius: 12, height: 44, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, justifyContent: 'center', marginBottom: 10 }}>
-                                <Ionicons name="chatbubble-ellipses-outline" size={18} color="#333" />
-                                <Text style={{ marginLeft: 8, fontSize: 16, color: '#333' }}>채팅하기</Text>
+                        
+                        <View style={{ padding: 20, alignItems: 'center' }}>
+                            {/* 프로필 아바타 */}
+                            <TouchableOpacity 
+                                style={{
+                                    width: 100,
+                                    height: 100,
+                                    borderRadius: 50,
+                                    backgroundColor: '#4CAF50',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    marginBottom: 15,
+                                }}
+                                onPress={() => setShowImageModal(true)}
+                            >
+                                <Text style={{ color: '#fff', fontSize: 24, fontWeight: 'bold' }}>
+                                    {selectedFriend.avatarText}
+                                </Text>
                             </TouchableOpacity>
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <TouchableOpacity onPress={() => { setShowProfileModal(false); router.push('/report'); }} style={{ flex: 1, borderWidth: 1, borderColor: '#f1c0c0', borderRadius: 12, height: 42, alignItems: 'center', justifyContent: 'center', marginRight: 6 }}>
-                                    <Text style={{ color: '#E53935' }}>신고</Text>
+                            
+                            {/* 사용자 정보 */}
+                            <Text style={{
+                                fontSize: 24,
+                                fontWeight: 'bold',
+                                color: '#333',
+                                marginBottom: 5,
+                            }}>
+                                {selectedFriend.name}
+                            </Text>
+                            <Text style={{
+                                fontSize: 16,
+                                color: '#666',
+                                marginBottom: 15,
+                            }}>서울시 · 24세</Text>
+                            
+                            {/* 하트 수 */}
+                            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: 15 }}>
+                                    <AntDesign name="heart" size={16} color="#E53935" />
+                                    <Text style={{
+                                        fontSize: 16,
+                                        fontWeight: 'bold',
+                                        color: '#333',
+                                        marginLeft: 5,
+                                    }}>1,245</Text>
+                                </View>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: 15 }}>
+                                    <Ionicons name="person" size={16} color="#4CAF50" />
+                                    <Text style={{
+                                        fontSize: 16,
+                                        fontWeight: 'bold',
+                                        color: '#333',
+                                        marginLeft: 5,
+                                    }}>89</Text>
+                                </View>
+                            </View>
+                            
+                            {/* 자기소개 */}
+                            <View style={{ width: '100%', marginBottom: 20 }}>
+                                <Text style={{
+                                    fontSize: 18,
+                                    fontWeight: 'bold',
+                                    color: '#333',
+                                    marginBottom: 10,
+                                }}>자기소개</Text>
+                                <Text style={{
+                                    fontSize: 14,
+                                    color: '#666',
+                                    lineHeight: 20,
+                                }}>
+                                    안녕하세요! {selectedFriend.name}입니다 ✨ 좋은 사람들과 함께 즐거운 대화 나누고 싶습니다. 많이 친해져요!
+                                </Text>
+                            </View>
+                            
+                            {/* 사주 키워드 */}
+                            <View style={{ width: '100%', marginBottom: 20 }}>
+                                <Text style={{
+                                    fontSize: 18,
+                                    fontWeight: 'bold',
+                                    color: '#333',
+                                    marginBottom: 10,
+                                }}>사주 키워드</Text>
+                                <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                                    <View style={{
+                                        backgroundColor: '#fff',
+                                        borderWidth: 1,
+                                        borderColor: '#4CAF50',
+                                        borderRadius: 15,
+                                        paddingHorizontal: 12,
+                                        paddingVertical: 6,
+                                        marginRight: 8,
+                                        marginBottom: 8,
+                                    }}>
+                                        <Text style={{
+                                            fontSize: 14,
+                                            color: '#4CAF50',
+                                            fontWeight: '500',
+                                        }}>친근함</Text>
+                                    </View>
+                                    <View style={{
+                                        backgroundColor: '#fff',
+                                        borderWidth: 1,
+                                        borderColor: '#4CAF50',
+                                        borderRadius: 15,
+                                        paddingHorizontal: 12,
+                                        paddingVertical: 6,
+                                        marginRight: 8,
+                                        marginBottom: 8,
+                                    }}>
+                                        <Text style={{
+                                            fontSize: 14,
+                                            color: '#4CAF50',
+                                            fontWeight: '500',
+                                        }}>신뢰</Text>
+                                    </View>
+                                    <View style={{
+                                        backgroundColor: '#fff',
+                                        borderWidth: 1,
+                                        borderColor: '#4CAF50',
+                                        borderRadius: 15,
+                                        paddingHorizontal: 12,
+                                        paddingVertical: 6,
+                                        marginRight: 8,
+                                        marginBottom: 8,
+                                    }}>
+                                        <Text style={{
+                                            fontSize: 14,
+                                            color: '#4CAF50',
+                                            fontWeight: '500',
+                                        }}>유머</Text>
+                                    </View>
+                                </View>
+                            </View>
+                            
+                            {/* 좋아요 및 친구 관련 버튼 */}
+                            <View style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                width: '100%',
+                                justifyContent: 'space-between',
+                            }}>
+                                <TouchableOpacity 
+                                    style={{
+                                        backgroundColor: '#f8f9fa',
+                                        borderRadius: 25,
+                                        paddingHorizontal: 20,
+                                        paddingVertical: 12,
+                                        flex: 1,
+                                        marginRight: 10,
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                    }}
+                                    onPress={() => setIsHeartLiked(!isHeartLiked)}
+                                >
+                                    <Ionicons 
+                                        name={isHeartLiked ? "heart" : "heart-outline"} 
+                                        size={20} 
+                                        color={isHeartLiked ? "#E53935" : "#4CAF50"} 
+                                    />
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={() => { setShowProfileModal(false); router.push('/blocked'); }} style={{ flex: 1, borderWidth: 1, borderColor: '#ddd', borderRadius: 12, height: 42, alignItems: 'center', justifyContent: 'center', marginLeft: 6 }}>
-                                    <Text style={{ color: '#333' }}>차단 관리</Text>
-                                </TouchableOpacity>
+                                
+                                {/* 친구 추가된 상태 - 채팅과 친구 삭제 버튼 */}
+                                <>
+                                    <TouchableOpacity 
+                                        style={{
+                                            backgroundColor: '#f8f9fa',
+                                            borderRadius: 25,
+                                            paddingHorizontal: 20,
+                                            paddingVertical: 12,
+                                            flex: 1,
+                                            marginRight: 10,
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                        }}
+                                        onPress={() => {
+                                            setShowProfileModal(false);
+                                            startChat(selectedFriend);
+                                        }}
+                                    >
+                                        <Ionicons name="chatbubble-outline" size={20} color="#4CAF50" />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity 
+                                        style={{
+                                            backgroundColor: '#f8f9fa',
+                                            borderRadius: 25,
+                                            paddingHorizontal: 20,
+                                            paddingVertical: 12,
+                                            flex: 1,
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                        }}
+                                        onPress={() => {
+                                            setShowProfileModal(false);
+                                            removeFriend(selectedFriend.id);
+                                        }}
+                                    >
+                                        <Ionicons name="person-remove" size={20} color="#E53935" />
+                                    </TouchableOpacity>
+                                </>
                             </View>
                         </View>
                     </View>
@@ -321,6 +517,14 @@ const FriendsListScreen = () => {
                     </View>
                 </View>
             </Modal>
+
+            {/* 이미지 확대 모달 */}
+            <ImageModal
+                visible={showImageModal}
+                onClose={() => setShowImageModal(false)}
+                imageUri={null}
+                userName={selectedFriend?.name || '친구'}
+            />
         </SafeAreaView>
     );
 };

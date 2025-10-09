@@ -25,6 +25,7 @@ const styles = StyleSheet.create({
         color: '#333',
     },
     mainCard: {
+        flex: 1,
         backgroundColor: '#fff',
         margin: 20,
         borderRadius: 16,
@@ -109,6 +110,7 @@ const styles = StyleSheet.create({
         color: 'rgba(255, 255, 255, 0.7)',
     },
     friendsList: {
+        flex: 1,
         paddingHorizontal: 20,
         paddingBottom: 20,
     },

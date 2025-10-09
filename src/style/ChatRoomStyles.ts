@@ -50,6 +50,17 @@ const styles = StyleSheet.create({
     moreButton: {
         padding: 5,
     },
+    headerRight: {
+        width: 34,
+    },
+    reportButton: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
     
     // 메시지 영역
     messagesContainer: {
@@ -275,6 +286,27 @@ const styles = StyleSheet.create({
     },
     cancelOptionText: {
         color: '#E53935',
+    },
+    
+    // 대화주제 추천 버튼
+    topicButton: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: '#fff',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 8,
+        borderWidth: 1,
+        borderColor: '#e9ecef',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
     },
 });
 

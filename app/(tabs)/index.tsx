@@ -1,11 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ScrollView, Text, View, TouchableOpacity, Modal } from 'react-native';
 // 아이콘 사용을 위한 임포트 (expo-vector-icons)
 import { AntDesign, Feather, Ionicons } from '@expo/vector-icons';
 // 스타일 임포트
 import styles from './HomeStyles';
 // 네비게이션 임포트
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
+// AsyncStorage 임포트
+import AsyncStorage from '@react-native-async-storage/async-storage';
+// 이미지 모달 컴포넌트
+import ImageModal from '../../components/ImageModal';
 
 // 랭킹 데이터 타입 정의
 interface RankingItem {
@@ -26,6 +30,60 @@ const HomeScreen = () => {
     const [showImageModal, setShowImageModal] = useState(false);
     // 랜덤 채팅/영상 선택 모달 상태
     const [showRandomModal, setShowRandomModal] = useState(false);
+    // 알림 갯수 상태
+    const [notificationCount, setNotificationCount] = useState(4); // 안읽은 알림 개수
+    
+    // 안읽은 알림 개수 계산 함수
+    const getUnreadNotificationCount = () => {
+        // 실제로는 서버에서 받아와야 하지만, 여기서는 더미 데이터로 계산
+        const friendRequests = 2; // 안읽은 친구 요청 (햇살왕자, 별빛나래)
+        const otherNotifications = 2; // 안읽은 기타 알림 (달빛소녀, 바람처럼)
+        return friendRequests + otherNotifications;
+    };
+
+    // 컴포넌트 마운트 시 알림 개수 로드
+    useEffect(() => {
+        loadNotificationCount();
+    }, []);
+
+    // 화면 포커스 시 알림 개수 다시 로드
+    useFocusEffect(
+        React.useCallback(() => {
+            loadNotificationCount();
+        }, [])
+    );
+
+    // AsyncStorage에서 알림 개수 로드
+    const loadNotificationCount = async () => {
+        try {
+            const count = await AsyncStorage.getItem('notificationCount');
+            if (count !== null) {
+                setNotificationCount(parseInt(count));
+            } else {
+                // 처음 실행 시 기본값 설정
+                setNotificationCount(4);
+                await AsyncStorage.setItem('notificationCount', '4');
+            }
+        } catch (error) {
+            console.error('알림 개수 로드 실패:', error);
+            setNotificationCount(4);
+        }
+    };
+
+    // 알림 개수를 0으로 리셋하는 함수
+    const resetNotificationCount = async () => {
+        setNotificationCount(0);
+        try {
+            await AsyncStorage.setItem('notificationCount', '0');
+        } catch (error) {
+            console.error('알림 개수 저장 실패:', error);
+        }
+    };
+
+    // 알림 화면으로 이동하는 함수
+    const goToNotifications = () => {
+        router.push('/notifications');
+    };
     
     // 랭킹 데이터를 위한 더미 배열 (실제 데이터는 서버에서 받아와야 합니다)
     const rankingData = [
@@ -83,10 +141,12 @@ const HomeScreen = () => {
                 <Text style={styles.logoText}>fate:try</Text>
                 <View style={styles.headerIcons}>
                     <TouchableOpacity 
-                        onPress={() => router.push('/notifications')}
+                        onPress={goToNotifications}
                     >
                         <Ionicons name="notifications-outline" size={24} color="#333" />
-                        <View style={styles.badge}><Text style={styles.badgeText}>3</Text></View>
+                        {notificationCount > 0 && (
+                            <View style={styles.badge}><Text style={styles.badgeText}>{notificationCount}</Text></View>
+                        )}
                     </TouchableOpacity>
                     <TouchableOpacity 
                         onPress={() => router.push('/chat')}
@@ -391,34 +451,12 @@ const HomeScreen = () => {
             )}
 
             {/* 이미지 확대 모달 */}
-            <Modal
+            <ImageModal
                 visible={showImageModal}
-                transparent={true}
-                animationType="fade"
-                onRequestClose={() => setShowImageModal(false)}
-            >
-                <View style={styles.imageModalOverlay}>
-                    <TouchableOpacity 
-                        style={styles.imageModalCloseArea}
-                        onPress={() => setShowImageModal(false)}
-                    >
-                        <View style={styles.imageModalContent}>
-                            <TouchableOpacity 
-                                style={styles.imageModalCloseButton}
-                                onPress={() => setShowImageModal(false)}
-                            >
-                                <Ionicons name="close" size={30} color="#fff" />
-                            </TouchableOpacity>
-                            <View style={styles.expandedAvatar}>
-                                <Ionicons name="person" size={120} color="#fff" />
-                            </View>
-                            <Text style={styles.expandedAvatarText}>
-                                {selectedProfile?.title || '사용자'}
-                            </Text>
-                        </View>
-                    </TouchableOpacity>
-                </View>
-            </Modal>
+                onClose={() => setShowImageModal(false)}
+                imageUri={null}
+                userName={selectedProfile?.title || '사용자'}
+            />
 
         </View>
     );

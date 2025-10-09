@@ -75,12 +75,7 @@ const RandomVideoWaitingScreen = () => {
         <SafeAreaView style={styles.container}>
             {/* 헤더 */}
             <View style={styles.header}>
-                <TouchableOpacity 
-                    style={styles.backButton}
-                    onPress={() => router.back()}
-                >
-                    <Ionicons name="arrow-back" size={24} color="#333" />
-                </TouchableOpacity>
+                <View style={styles.headerSpacer} />
                 <Text style={styles.headerTitle}>랜덤 영상</Text>
                 <View style={styles.headerSpacer} />
             </View>

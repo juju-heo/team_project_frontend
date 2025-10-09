@@ -70,6 +70,7 @@ const RandomChatWaitingScreen = () => {
         router.back();
     };
 
+
     // 시간 포맷 함수 (초를 "N초 경과" 또는 "N분 N초 경과" 형식으로 변환)
     const formatTime = (seconds: number) => {
         if (seconds < 60) {
@@ -84,12 +85,7 @@ const RandomChatWaitingScreen = () => {
         <SafeAreaView style={styles.container}>
             {/* 헤더 */}
             <View style={styles.header}>
-                <TouchableOpacity 
-                    style={styles.backButton}
-                    onPress={() => router.back()}
-                >
-                    <Ionicons name="arrow-back" size={24} color="#333" />
-                </TouchableOpacity>
+                <View style={styles.headerSpacer} />
                 <Text style={styles.headerTitle}>랜덤 채팅</Text>
                 <View style={styles.headerSpacer} />
             </View>
@@ -135,14 +131,17 @@ const RandomChatWaitingScreen = () => {
                     </View>
                 </View>
 
-                {/* 취소 버튼 */}
-                <TouchableOpacity 
-                    style={styles.cancelButton}
-                    onPress={handleCancel}
-                >
-                    <Ionicons name="close" size={20} color="#fff" />
-                    <Text style={styles.cancelButtonText}>검색 취소</Text>
-                </TouchableOpacity>
+                {/* 버튼들 */}
+                <View style={{ alignItems: 'center', width: '100%', paddingHorizontal: 20 }}>
+                    {/* 취소 버튼 */}
+                    <TouchableOpacity 
+                        style={styles.cancelButton}
+                        onPress={handleCancel}
+                    >
+                        <Ionicons name="close" size={20} color="#fff" />
+                        <Text style={styles.cancelButtonText}>검색 취소</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
         </SafeAreaView>
     );

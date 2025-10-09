@@ -202,6 +202,16 @@ const styles = StyleSheet.create({
         padding: 10,
         borderRadius: 25,
     },
+    videoChatIcon: {
+        position: 'relative',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    chatOverlay: {
+        position: 'absolute',
+        bottom: -2,
+        right: -2,
+    },
 });
 
 export default styles;

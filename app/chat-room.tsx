@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, TextInput, ScrollView, KeyboardAvoidingView, Platform, Image, Modal, Alert } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, AntDesign } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import styles from '../src/style/ChatRoomStyles';
+import ImageModal from '../components/ImageModal';
 
 // 채팅 메시지 인터페이스
 interface Message {
@@ -45,6 +46,63 @@ export default function ChatRoomScreen() {
     
     // 사진 선택 모달 상태
     const [showImageModal, setShowImageModal] = useState(false);
+    
+    // 프로필 모달 상태
+    const [showProfileModal, setShowProfileModal] = useState(false);
+    const [isHeartLiked, setIsHeartLiked] = useState(false);
+    const [isFriendAdded, setIsFriendAdded] = useState(true); // 채팅방에서는 이미 친구이므로 true
+    const [showImageExpandModal, setShowImageExpandModal] = useState(false);
+    
+    // 대화주제 추천 모달 상태
+    const [showTopicModal, setShowTopicModal] = useState(false);
+    
+    // 나가기 확인 모달 상태
+    const [showExitConfirmModal, setShowExitConfirmModal] = useState(false);
+    
+    // 대화주제 데이터
+    const conversationTopics = [
+        "오늘 날씨가 정말 좋네요! 어떤 계획이 있으신가요?",
+        "요즘 즐겨보는 드라마나 영화가 있나요?",
+        "좋아하는 음식이나 맛집이 있다면 추천해주세요!",
+        "주말에는 보통 어떻게 보내시나요?",
+        "여행 가고 싶은 곳이 있다면 어디인가요?",
+        "취미나 관심사가 있으시다면 무엇인가요?",
+        "좋아하는 음악 장르나 아티스트가 있나요?",
+        "운동이나 스포츠를 즐기시나요?",
+        "책을 읽는 것을 좋아하시나요?",
+        "요리나 베이킹에 관심이 있으신가요?"
+    ];
+    
+    // 대화주제 선택 함수
+    const selectTopic = (topic: string) => {
+        const newMessage: Message = {
+            id: messages.length + 1,
+            text: topic,
+            time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
+            isMine: true
+        };
+        
+        setMessages([...messages, newMessage]);
+        setShowTopicModal(false);
+    };
+
+    // 나가기 확인 모달 핸들러들
+    const handleExitChat = () => {
+        if (isRandom) {
+            setShowExitConfirmModal(true);
+        } else {
+            router.back();
+        }
+    };
+
+    const confirmExit = () => {
+        setShowExitConfirmModal(false);
+        router.push('/(tabs)');
+    };
+
+    const cancelExit = () => {
+        setShowExitConfirmModal(false);
+    };
     
     // 채팅 메시지 목록 - 랜덤 채팅이면 빈 배열, 아니면 더미 데이터
     const [messages, setMessages] = useState<Message[]>(
@@ -203,22 +261,40 @@ export default function ChatRoomScreen() {
             {/* 상단 헤더 */}
             <View style={styles.header}>
                 <TouchableOpacity 
-                    onPress={() => router.back()}
+                    onPress={handleExitChat}
                     style={styles.backButton}
                 >
-                    <Ionicons name="arrow-back" size={24} color="#333" />
+                    {isRandom ? (
+                        <Ionicons name="close" size={24} color="#E53935" />
+                    ) : (
+                        <Ionicons name="arrow-back" size={24} color="#333" />
+                    )}
                 </TouchableOpacity>
                 
-                <View style={styles.headerCenter}>
+                <TouchableOpacity 
+                    style={styles.headerCenter}
+                    onPress={() => {
+                        setIsHeartLiked(false);
+                        setIsFriendAdded(true);
+                        setShowProfileModal(true);
+                    }}
+                >
                     <View style={styles.headerAvatar}>
                         <Text style={styles.headerAvatarText}>{userAvatar}</Text>
                     </View>
                     <Text style={styles.headerTitle}>{userName}</Text>
-                </View>
-                
-                <TouchableOpacity style={styles.moreButton}>
-                    <Ionicons name="ellipsis-vertical" size={24} color="#333" />
                 </TouchableOpacity>
+                
+                <View style={styles.headerRight}>
+                    {isRandom && (
+                        <TouchableOpacity 
+                            style={styles.reportButton}
+                            onPress={() => router.push('/report')}
+                        >
+                            <Ionicons name="flag" size={24} color="#FF9800" />
+                        </TouchableOpacity>
+                    )}
+                </View>
             </View>
 
             {/* 채팅 메시지 영역 */}
@@ -261,9 +337,16 @@ export default function ChatRoomScreen() {
                         ]}
                     >
                         {!message.isMine && (
-                            <View style={styles.messageAvatar}>
+                            <TouchableOpacity 
+                                style={styles.messageAvatar}
+                                onPress={() => {
+                                    setIsHeartLiked(false);
+                                    setIsFriendAdded(true);
+                                    setShowProfileModal(true);
+                                }}
+                            >
                                 <Text style={styles.messageAvatarText}>{userAvatar}</Text>
-                            </View>
+                            </TouchableOpacity>
                         )}
                         
                         <View style={styles.messageContent}>
@@ -326,6 +409,12 @@ export default function ChatRoomScreen() {
 
             {/* 하단 입력 영역 */}
             <View style={styles.inputContainer}>
+                <TouchableOpacity 
+                    style={styles.topicButton}
+                    onPress={() => setShowTopicModal(true)}
+                >
+                    <Text style={{ fontSize: 20 }}>💡</Text>
+                </TouchableOpacity>
                 <TouchableOpacity 
                     style={styles.addButton}
                     onPress={() => setShowImageModal(true)}
@@ -393,6 +482,435 @@ export default function ChatRoomScreen() {
                     </View>
                 </TouchableOpacity>
             </Modal>
+
+            {/* 친구 프로필 모달 */}
+            {showProfileModal && (
+                <View style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    zIndex: 1000,
+                }}>
+                    <View style={{
+                        backgroundColor: '#fff',
+                        borderRadius: 20,
+                        maxHeight: '80%',
+                        width: '90%',
+                        maxWidth: 400,
+                        paddingTop: 20,
+                    }}>
+                        <View style={{
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            paddingHorizontal: 20,
+                            paddingBottom: 20,
+                            borderBottomWidth: 1,
+                            borderBottomColor: '#eee',
+                        }}>
+                            <Text style={{
+                                fontSize: 20,
+                                fontWeight: 'bold',
+                                color: '#333',
+                            }}>프로필</Text>
+                            <TouchableOpacity 
+                                onPress={() => setShowProfileModal(false)}
+                                style={{ padding: 5 }}
+                            >
+                                <Ionicons name="close" size={24} color="#333" />
+                            </TouchableOpacity>
+                        </View>
+                        
+                        <View style={{ padding: 20, alignItems: 'center' }}>
+                            {/* 프로필 아바타 */}
+                            <TouchableOpacity 
+                                style={{
+                                    width: 100,
+                                    height: 100,
+                                    borderRadius: 50,
+                                    backgroundColor: '#4CAF50',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    marginBottom: 15,
+                                }}
+                                onPress={() => setShowImageExpandModal(true)}
+                            >
+                                <Text style={{ color: '#fff', fontSize: 24, fontWeight: 'bold' }}>
+                                    {userAvatar}
+                                </Text>
+                            </TouchableOpacity>
+                            
+                            {/* 사용자 정보 */}
+                            <Text style={{
+                                fontSize: 24,
+                                fontWeight: 'bold',
+                                color: '#333',
+                                marginBottom: 5,
+                            }}>
+                                {userName}
+                            </Text>
+                            <Text style={{
+                                fontSize: 16,
+                                color: '#666',
+                                marginBottom: 15,
+                            }}>서울시 · 24세</Text>
+                            
+                            {/* 하트 수 */}
+                            <View style={{ flexDirection: 'row', marginBottom: 20 }}>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: 15 }}>
+                                    <AntDesign name="heart" size={16} color="#E53935" />
+                                    <Text style={{
+                                        fontSize: 16,
+                                        fontWeight: 'bold',
+                                        color: '#333',
+                                        marginLeft: 5,
+                                    }}>1,245</Text>
+                                </View>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: 15 }}>
+                                    <Ionicons name="person" size={16} color="#4CAF50" />
+                                    <Text style={{
+                                        fontSize: 16,
+                                        fontWeight: 'bold',
+                                        color: '#333',
+                                        marginLeft: 5,
+                                    }}>89</Text>
+                                </View>
+                            </View>
+                            
+                            {/* 자기소개 */}
+                            <View style={{ width: '100%', marginBottom: 20 }}>
+                                <Text style={{
+                                    fontSize: 18,
+                                    fontWeight: 'bold',
+                                    color: '#333',
+                                    marginBottom: 10,
+                                }}>자기소개</Text>
+                                <Text style={{
+                                    fontSize: 14,
+                                    color: '#666',
+                                    lineHeight: 20,
+                                }}>
+                                    안녕하세요! {userName}입니다 ✨ 좋은 사람들과 함께 즐거운 대화 나누고 싶습니다. 많이 친해져요!
+                                </Text>
+                            </View>
+                            
+                            {/* 사주 키워드 */}
+                            <View style={{ width: '100%', marginBottom: 20 }}>
+                                <Text style={{
+                                    fontSize: 18,
+                                    fontWeight: 'bold',
+                                    color: '#333',
+                                    marginBottom: 10,
+                                }}>사주 키워드</Text>
+                                <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                                    <View style={{
+                                        backgroundColor: '#fff',
+                                        borderWidth: 1,
+                                        borderColor: '#4CAF50',
+                                        borderRadius: 15,
+                                        paddingHorizontal: 12,
+                                        paddingVertical: 6,
+                                        marginRight: 8,
+                                        marginBottom: 8,
+                                    }}>
+                                        <Text style={{
+                                            fontSize: 14,
+                                            color: '#4CAF50',
+                                            fontWeight: '500',
+                                        }}>친근함</Text>
+                                    </View>
+                                    <View style={{
+                                        backgroundColor: '#fff',
+                                        borderWidth: 1,
+                                        borderColor: '#4CAF50',
+                                        borderRadius: 15,
+                                        paddingHorizontal: 12,
+                                        paddingVertical: 6,
+                                        marginRight: 8,
+                                        marginBottom: 8,
+                                    }}>
+                                        <Text style={{
+                                            fontSize: 14,
+                                            color: '#4CAF50',
+                                            fontWeight: '500',
+                                        }}>신뢰</Text>
+                                    </View>
+                                    <View style={{
+                                        backgroundColor: '#fff',
+                                        borderWidth: 1,
+                                        borderColor: '#4CAF50',
+                                        borderRadius: 15,
+                                        paddingHorizontal: 12,
+                                        paddingVertical: 6,
+                                        marginRight: 8,
+                                        marginBottom: 8,
+                                    }}>
+                                        <Text style={{
+                                            fontSize: 14,
+                                            color: '#4CAF50',
+                                            fontWeight: '500',
+                                        }}>유머</Text>
+                                    </View>
+                                </View>
+                            </View>
+                            
+                            {/* 좋아요 및 친구 관련 버튼 */}
+                            <View style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                width: '100%',
+                                justifyContent: 'space-between',
+                            }}>
+                                <TouchableOpacity 
+                                    style={{
+                                        backgroundColor: '#f8f9fa',
+                                        borderRadius: 25,
+                                        paddingHorizontal: 20,
+                                        paddingVertical: 12,
+                                        flex: 1,
+                                        marginRight: 10,
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                    }}
+                                    onPress={() => setIsHeartLiked(!isHeartLiked)}
+                                >
+                                    <Ionicons 
+                                        name={isHeartLiked ? "heart" : "heart-outline"} 
+                                        size={20} 
+                                        color={isHeartLiked ? "#E53935" : "#4CAF50"} 
+                                    />
+                                </TouchableOpacity>
+                                
+                                {/* 친구 추가된 상태 - 채팅과 친구 삭제 버튼 */}
+                                <>
+                                    <TouchableOpacity 
+                                        style={{
+                                            backgroundColor: '#f8f9fa',
+                                            borderRadius: 25,
+                                            paddingHorizontal: 20,
+                                            paddingVertical: 12,
+                                            flex: 1,
+                                            marginRight: 10,
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                        }}
+                                        onPress={() => setShowProfileModal(false)}
+                                    >
+                                        <Ionicons name="chatbubble-outline" size={20} color="#4CAF50" />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity 
+                                        style={{
+                                            backgroundColor: '#f8f9fa',
+                                            borderRadius: 25,
+                                            paddingHorizontal: 20,
+                                            paddingVertical: 12,
+                                            flex: 1,
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                        }}
+                                        onPress={() => {
+                                            setShowProfileModal(false);
+                                            // 친구 삭제 기능 (실제 구현 시 AsyncStorage에서 제거)
+                                            Alert.alert(
+                                                '친구 삭제',
+                                                `${userName}님을 친구 목록에서 삭제하시겠습니까?`,
+                                                [
+                                                    { text: '취소', style: 'cancel' },
+                                                    { 
+                                                        text: '삭제', 
+                                                        style: 'destructive',
+                                                        onPress: () => {
+                                                            // 실제 친구 삭제 로직 구현 필요
+                                                            Alert.alert('삭제됨', '친구가 삭제되었습니다.');
+                                                        }
+                                                    }
+                                                ]
+                                            );
+                                        }}
+                                    >
+                                        <Ionicons name="person-remove" size={20} color="#E53935" />
+                                    </TouchableOpacity>
+                                </>
+                            </View>
+                        </View>
+                    </View>
+                </View>
+            )}
+
+            {/* 이미지 확대 모달 */}
+            <ImageModal
+                visible={showImageExpandModal}
+                onClose={() => setShowImageExpandModal(false)}
+                imageUri={null}
+                userName={userName}
+            />
+
+            {/* 대화주제 추천 말풍선 */}
+            {showTopicModal && (
+                <TouchableOpacity 
+                    style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: 'transparent',
+                        zIndex: 999,
+                    }}
+                    activeOpacity={1}
+                    onPress={() => setShowTopicModal(false)}
+                >
+                    <View style={{
+                        position: 'absolute',
+                        bottom: 80, // 입력 영역 위에 위치
+                        left: 20,
+                        backgroundColor: '#fff',
+                        borderRadius: 12,
+                        padding: 12,
+                        maxWidth: 280,
+                        shadowColor: '#000',
+                        shadowOffset: {
+                            width: 0,
+                            height: 2,
+                        },
+                        shadowOpacity: 0.25,
+                        shadowRadius: 3.84,
+                        elevation: 5,
+                        zIndex: 1000,
+                    }}>
+                        {/* 말풍선 꼬리 */}
+                        <View style={{
+                            position: 'absolute',
+                            bottom: -8,
+                            left: 20,
+                            width: 0,
+                            height: 0,
+                            borderLeftWidth: 8,
+                            borderRightWidth: 8,
+                            borderTopWidth: 8,
+                            borderLeftColor: 'transparent',
+                            borderRightColor: 'transparent',
+                            borderTopColor: '#fff',
+                        }} />
+                        
+                        <ScrollView style={{ maxHeight: 200 }}>
+                            {conversationTopics.map((topic, index) => (
+                                <TouchableOpacity
+                                    key={index}
+                                    style={{
+                                        paddingVertical: 8,
+                                        paddingHorizontal: 4,
+                                        borderBottomWidth: index < conversationTopics.length - 1 ? 1 : 0,
+                                        borderBottomColor: '#f0f0f0',
+                                    }}
+                                    onPress={() => selectTopic(topic)}
+                                >
+                                    <Text style={{
+                                        fontSize: 13,
+                                        color: '#333',
+                                        lineHeight: 18
+                                    }}>
+                                        {topic}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
+                    </View>
+                </TouchableOpacity>
+            )}
+
+            {/* 나가기 확인 모달 */}
+            {showExitConfirmModal && (
+                <Modal
+                    visible={showExitConfirmModal}
+                    transparent={true}
+                    animationType="fade"
+                    onRequestClose={cancelExit}
+                >
+                    <View style={{
+                        flex: 1,
+                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        paddingHorizontal: 20
+                    }}>
+                        <View style={{
+                            backgroundColor: '#fff',
+                            borderRadius: 16,
+                            padding: 20,
+                            width: '100%',
+                            maxWidth: 300
+                        }}>
+                            <Text style={{
+                                fontSize: 18,
+                                fontWeight: 'bold',
+                                color: '#333',
+                                textAlign: 'center',
+                                marginBottom: 20
+                            }}>
+                                채팅방 나가기
+                            </Text>
+                            
+                            <Text style={{
+                                fontSize: 14,
+                                color: '#666',
+                                textAlign: 'center',
+                                marginBottom: 20,
+                                lineHeight: 20
+                            }}>
+                                정말로 채팅방을 나가시겠습니까?
+                            </Text>
+                            
+                            <View style={{
+                                flexDirection: 'row',
+                                justifyContent: 'space-between',
+                                gap: 10
+                            }}>
+                                <TouchableOpacity
+                                    style={{
+                                        flex: 1,
+                                        backgroundColor: '#f5f5f5',
+                                        paddingVertical: 12,
+                                        borderRadius: 8,
+                                        alignItems: 'center'
+                                    }}
+                                    onPress={cancelExit}
+                                >
+                                    <Text style={{
+                                        color: '#666',
+                                        fontWeight: '600'
+                                    }}>
+                                        아니오
+                                    </Text>
+                                </TouchableOpacity>
+                                
+                                <TouchableOpacity
+                                    style={{
+                                        flex: 1,
+                                        backgroundColor: '#E53935',
+                                        paddingVertical: 12,
+                                        borderRadius: 8,
+                                        alignItems: 'center'
+                                    }}
+                                    onPress={confirmExit}
+                                >
+                                    <Text style={{
+                                        color: '#fff',
+                                        fontWeight: '600'
+                                    }}>
+                                        예
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+            )}
         </KeyboardAvoidingView>
     );
 }

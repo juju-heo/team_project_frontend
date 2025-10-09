@@ -6,8 +6,7 @@ import styles from '../src/style/RandomVideoEndStyles';
 
 const RandomVideoEndScreen = () => {
     const handleReport = () => {
-        // 신고 기능 구현
-        console.log('신고하기');
+        router.push('/report');
     };
 
     const handleMatchAgain = () => {

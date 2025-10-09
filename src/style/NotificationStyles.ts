@@ -24,6 +24,9 @@ const styles = StyleSheet.create({
     backButton: {
         padding: 5,
     },
+    headerSpacer: {
+        width: 34,
+    },
     markAllReadButton: {
         padding: 5,
     },

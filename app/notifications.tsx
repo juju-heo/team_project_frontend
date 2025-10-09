@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ScrollView, Text, View, TouchableOpacity, SafeAreaView, Modal, Image } from 'react-native';
 import { AntDesign, Ionicons, Feather } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from '../src/style/NotificationStyles';
 
 // 알림 데이터 타입 정의
@@ -38,125 +39,121 @@ const NotificationScreen = () => {
     const [isFriendAdded, setIsFriendAdded] = useState(false);
     const [showImageModal, setShowImageModal] = useState(false);
     
-    const [notifications, setNotifications] = useState<NotificationSection[]>([
+    const [friendRequests, setFriendRequests] = useState<NotificationItem[]>([
         {
-            title: '친구 요청',
-            badgeCount: 2,
-            notifications: [
-                {
-                    id: 1,
-                    type: 'friend_request',
-                    username: '햇살왕자',
-                    avatarText: '햇살',
-                    message: '친구 요청을 보냈습니다',
-                    time: '5분 전',
-                    isRead: false,
-                    isOnline: true,
-                },
-                {
-                    id: 2,
-                    type: 'friend_request',
-                    username: '별빛나래',
-                    avatarText: '별빛',
-                    message: '친구 요청을 보냈습니다',
-                    time: '1시간 전',
-                    isRead: false,
-                    isOnline: true,
-                },
-            ],
+            id: 1,
+            type: 'friend_request',
+            username: '햇살왕자',
+            avatarText: '햇살',
+            message: '친구 요청을 보냈습니다',
+            time: '5분 전',
+            isRead: false,
+            isOnline: true,
         },
         {
-            title: '오늘',
-            notifications: [
-                {
-                    id: 3,
-                    type: 'heart',
-                    username: '달빛소녀',
-                    avatarText: '달빛',
-                    message: '당신에게 하트를 눌렀습니다',
-                    time: '2분 전',
-                    isRead: false,
-                    isOnline: true,
-                },
-                {
-                    id: 4,
-                    type: 'message',
-                    username: '바람처럼',
-                    avatarText: '바람',
-                    message: '새로운 메시지를 보냈습니다',
-                    time: '10분 전',
-                    isRead: false,
-                    isOnline: true,
-                },
-            ],
+            id: 2,
+            type: 'friend_request',
+            username: '별빛나래',
+            avatarText: '별빛',
+            message: '친구 요청을 보냈습니다',
+            time: '1시간 전',
+            isRead: false,
+            isOnline: true,
+        },
+    ]);
+
+    const [otherNotifications, setOtherNotifications] = useState<NotificationItem[]>([
+        {
+            id: 3,
+            type: 'heart',
+            username: '달빛소녀',
+            avatarText: '달빛',
+            message: '당신에게 하트를 눌렀습니다',
+            time: '2분 전',
+            isRead: false,
+            isOnline: true,
         },
         {
-            title: '어제',
-            notifications: [
-                {
-                    id: 5,
-                    type: 'heart',
-                    username: '구름속에',
-                    avatarText: '구름',
-                    message: '당신에게 하트를 눌렀습니다',
-                    time: '오후 11:30',
-                    isRead: true,
-                },
-                {
-                    id: 6,
-                    type: 'message',
-                    username: '파도소리',
-                    avatarText: '파도',
-                    message: '안녕하세요! 반가워요',
-                    time: '오전 9:15',
-                    isRead: true,
-                },
-            ],
+            id: 4,
+            type: 'message',
+            username: '바람처럼',
+            avatarText: '바람',
+            message: '새로운 메시지를 보냈습니다',
+            time: '10분 전',
+            isRead: false,
+            isOnline: true,
         },
         {
-            title: '최근 30일',
-            notifications: [
-                {
-                    id: 7,
-                    type: 'heart',
-                    username: '꽃피는봄',
-                    avatarText: '꽃피',
-                    message: '당신에게 하트를 눌렀습니다',
-                    time: '10월 25일',
-                    isRead: true,
-                },
-                {
-                    id: 8,
-                    type: 'system',
-                    username: 'fate:try',
-                    avatarText: '',
-                    message: '매주 월요일 이벤트가 시작되었습니다!',
-                    time: '10월 23일',
-                    isRead: true,
-                },
-            ],
+            id: 5,
+            type: 'heart',
+            username: '구름속에',
+            avatarText: '구름',
+            message: '당신에게 하트를 눌렀습니다',
+            time: '오후 11:30',
+            isRead: true,
+        },
+        {
+            id: 6,
+            type: 'message',
+            username: '파도소리',
+            avatarText: '파도',
+            message: '안녕하세요! 반가워요',
+            time: '오전 9:15',
+            isRead: true,
+        },
+        {
+            id: 7,
+            type: 'heart',
+            username: '꽃피는봄',
+            avatarText: '꽃피',
+            message: '당신에게 하트를 눌렀습니다',
+            time: '10월 25일',
+            isRead: true,
+        },
+        {
+            id: 8,
+            type: 'system',
+            username: 'fate:try',
+            avatarText: '',
+            message: '매주 월요일 이벤트가 시작되었습니다!',
+            time: '10월 23일',
+            isRead: true,
         },
     ]);
 
     // 친구 요청 수락/거절 함수
     const handleFriendRequest = (notificationId: number, action: 'accept' | 'decline') => {
-        setNotifications(prev => 
-            prev.map(section => ({
-                ...section,
-                notifications: section.notifications.filter(notif => notif.id !== notificationId)
-            }))
+        setFriendRequests(prev => 
+            prev.filter(notif => notif.id !== notificationId)
         );
     };
 
-    // 모든 알림 읽음 처리
+    // 모든 알림 읽음 처리 (화면 진입 시 자동 실행)
     const markAllAsRead = () => {
-        setNotifications(prev => 
-            prev.map(section => ({
-                ...section,
-                notifications: section.notifications.map(notif => ({ ...notif, isRead: true })),
-                badgeCount: 0,
-            }))
+        setFriendRequests(prev => 
+            prev.map(notif => ({ ...notif, isRead: true }))
         );
+        setOtherNotifications(prev => 
+            prev.map(notif => ({ ...notif, isRead: true }))
+        );
+    };
+
+    // 화면 진입 시 모든 알림 읽음 처리
+    useFocusEffect(
+        React.useCallback(() => {
+            markAllAsRead();
+            // 홈 화면의 알림 개수도 0으로 업데이트
+            resetHomeNotificationCount();
+        }, [])
+    );
+
+    // 홈 화면의 알림 개수를 0으로 리셋
+    const resetHomeNotificationCount = async () => {
+        try {
+            await AsyncStorage.setItem('notificationCount', '0');
+        } catch (error) {
+            console.error('알림 개수 리셋 실패:', error);
+        }
     };
 
     // 프로필 클릭 핸들러
@@ -260,30 +257,45 @@ const NotificationScreen = () => {
                     <Ionicons name="arrow-back" size={24} color="#333" />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>알림</Text>
-                <TouchableOpacity 
-                    style={styles.markAllReadButton}
-                    onPress={markAllAsRead}
-                >
-                    <Text style={styles.markAllReadText}>모두 읽음</Text>
-                </TouchableOpacity>
+                <View style={styles.headerSpacer} />
             </View>
 
             {/* 알림 목록 */}
             <ScrollView contentContainerStyle={styles.scrollContent}>
-                {notifications.map((section, sectionIndex) => (
-                    <View key={sectionIndex} style={styles.notificationSection}>
-                        <View style={styles.sectionHeader}>
-                            <Ionicons name="notifications-outline" size={20} color="#333" />
-                            <Text style={styles.sectionTitle}>{section.title}</Text>
-                            {section.badgeCount && section.badgeCount > 0 && (
-                                <View style={styles.notificationBadge}>
-                                    <Text style={styles.badgeText}>{section.badgeCount}</Text>
-                                </View>
-                            )}
-                        </View>
-                        {section.notifications.map(renderNotificationCard)}
+                {/* 친구 요청 섹션 */}
+                <View style={styles.notificationSection}>
+                    <View style={styles.sectionHeader}>
+                        <Ionicons name="person-add-outline" size={20} color="#333" />
+                        <Text style={styles.sectionTitle}>친구 요청</Text>
+                        {friendRequests.length > 0 && (
+                            <View style={styles.notificationBadge}>
+                                <Text style={styles.badgeText}>{friendRequests.length}</Text>
+                            </View>
+                        )}
                     </View>
-                ))}
+                    {friendRequests.length > 0 ? (
+                        friendRequests.map(renderNotificationCard)
+                    ) : (
+                        <View style={styles.emptyState}>
+                            <Text style={styles.emptyStateText}>친구 요청이 없습니다</Text>
+                        </View>
+                    )}
+                </View>
+
+                {/* 기타 알림들 */}
+                <View style={styles.notificationSection}>
+                    <View style={styles.sectionHeader}>
+                        <Ionicons name="notifications-outline" size={20} color="#333" />
+                        <Text style={styles.sectionTitle}>알림</Text>
+                    </View>
+                    {otherNotifications.length > 0 ? (
+                        otherNotifications.map(renderNotificationCard)
+                    ) : (
+                        <View style={styles.emptyState}>
+                            <Text style={styles.emptyStateText}>알림이 없습니다</Text>
+                        </View>
+                    )}
+                </View>
             </ScrollView>
 
             {/* 프로필 모달 */}
@@ -427,3 +439,4 @@ const NotificationScreen = () => {
 };
 
 export default NotificationScreen;
+

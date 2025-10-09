@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, SafeAreaView, TextInput, ScrollView, Imag
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
+import ImageModal from '../components/ImageModal';
 
 export default function ProfileEditScreen() {
     const [name, setName] = useState('홍길동');
@@ -12,6 +13,7 @@ export default function ProfileEditScreen() {
     const [bio, setBio] = useState('안녕하세요! 만나서 반가워요 😊');
     const keywords = ['열정', '사랑', '기쁨'];
     const [imageUri, setImageUri] = useState<string | null>(null);
+    const [showImageModal, setShowImageModal] = useState(false);
 
     const requestMediaPermission = useCallback(async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -52,13 +54,16 @@ export default function ProfileEditScreen() {
                 {/* 프로필 사진 */}
                 <View style={{ backgroundColor: '#fff', borderRadius: 14, padding: 16, borderWidth: 1, borderColor: '#eee', marginBottom: 16 }}>
                     <View style={{ alignItems: 'center' }}>
-                        <View style={{ width: 96, height: 96, borderRadius: 48, backgroundColor: imageUri ? 'transparent' : '#4CAF50', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', borderWidth: 4, borderColor: 'rgba(76,175,80,0.2)' }}>
+                        <TouchableOpacity 
+                            onPress={() => setShowImageModal(true)}
+                            style={{ width: 96, height: 96, borderRadius: 48, backgroundColor: imageUri ? 'transparent' : '#4CAF50', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', borderWidth: 4, borderColor: 'rgba(76,175,80,0.2)' }}
+                        >
                             {imageUri ? (
                                 <Image source={{ uri: imageUri }} style={{ width: 96, height: 96 }} />
                             ) : (
                                 <Ionicons name="person" size={44} color="#fff" />
                             )}
-                        </View>
+                        </TouchableOpacity>
                         <TouchableOpacity onPress={pickImage} style={{ marginTop: 12, borderWidth: 1, borderColor: '#eee', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 8 }}>
                             <Text style={{ color: '#333' }}>사진 변경</Text>
                         </TouchableOpacity>
@@ -99,6 +104,14 @@ export default function ProfileEditScreen() {
                     <Text style={{ color: '#fff', fontWeight: '700' }}>프로필 저장</Text>
                 </TouchableOpacity>
             </ScrollView>
+
+            {/* 이미지 확대 모달 */}
+            <ImageModal
+                visible={showImageModal}
+                onClose={() => setShowImageModal(false)}
+                imageUri={imageUri}
+                userName={name}
+            />
         </SafeAreaView>
     );
 }
