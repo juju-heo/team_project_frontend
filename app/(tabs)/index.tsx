@@ -28,6 +28,8 @@ const HomeScreen = () => {
     const [isHeartLiked, setIsHeartLiked] = useState(false);
     const [isFriendAdded, setIsFriendAdded] = useState(false);
     const [showImageModal, setShowImageModal] = useState(false);
+    // 사주 키워드 펼침 상태
+    const [keywordsExpanded, setKeywordsExpanded] = useState(false);
     // 랜덤 채팅/영상 선택 모달 상태
     const [showRandomModal, setShowRandomModal] = useState(false);
     // 알림 갯수 상태
@@ -108,6 +110,36 @@ const HomeScreen = () => {
         { id: 4, title: '이태원girl', score: 2420, icon: 'person' },
     ];
 
+    // 사주 키워드 데이터 (프로필별로 고정)
+    const getProfileKeywords = (profileTitle: string) => {
+        // 이달의 랭킹에 있는 사람들은 12-16개의 키워드
+        const isMonthlyRanking = monthlyRankingData.some(person => person.title === profileTitle);
+        
+        const allKeywords = [
+            '사랑', '열정', '기쁨', '행복', '희망', '꿈', '자유', '평화',
+            '건강', '부귀', '명예', '성공', '운세', '복', '영광', '축복'
+        ];
+        
+        // 프로필 이름을 해시해서 고정된 키워드 가져오기
+        let hash = 0;
+        for (let i = 0; i < profileTitle.length; i++) {
+            hash = ((hash << 5) - hash) + profileTitle.charCodeAt(i);
+            hash = hash & hash;
+        }
+        
+        if (isMonthlyRanking) {
+            // 이달의 랭킹: 16개 키워드
+            const count = 16;
+            const startIdx = Math.abs(hash) % (allKeywords.length - count + 1);
+            return allKeywords.slice(startIdx, startIdx + count);
+        } else {
+            // 일반 사용자: 8개 키워드
+            const count = 8;
+            const startIdx = Math.abs(hash) % (allKeywords.length - count + 1);
+            return allKeywords.slice(startIdx, startIdx + count);
+        }
+    };
+
     // 개별 랭킹 카드를 렌더링하는 컴포넌트 함수
     const renderRankingCard = (item: RankingItem, index: number) => (
         <TouchableOpacity 
@@ -118,6 +150,7 @@ const HomeScreen = () => {
                 setSelectedProfile(item);
                 setIsHeartLiked(false); // 하트 상태 초기화
                 setIsFriendAdded(false); // 친구 상태 초기화
+                setKeywordsExpanded(false); // 키워드 펼침 상태 초기화
                 setShowProfileModal(true);
                 console.log('프로필 모달 상태:', showProfileModal);
             }}
@@ -381,17 +414,35 @@ const HomeScreen = () => {
                             
                             {/* 사주 키워드 */}
                             <View style={styles.keywordsSection}>
-                                <Text style={styles.sectionTitle}>사주 키워드</Text>
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                                    <Text style={styles.sectionTitle}>사주 키워드</Text>
+                                    {(() => {
+                                        const keywords = selectedProfile ? getProfileKeywords(selectedProfile.title) : [];
+                                        return keywords.length > 4 ? (
+                                            <TouchableOpacity 
+                                                onPress={() => setKeywordsExpanded(!keywordsExpanded)}
+                                            >
+                                                <Ionicons 
+                                                    name={keywordsExpanded ? "chevron-up" : "chevron-down"} 
+                                                    size={20} 
+                                                    color="#4CAF50" 
+                                                />
+                                            </TouchableOpacity>
+                                        ) : null;
+                                    })()}
+                                </View>
                                 <View style={styles.keywordsContainer}>
-                                    <View style={styles.keywordTag}>
-                                        <Text style={styles.keywordText}>사랑</Text>
-                                    </View>
-                                    <View style={styles.keywordTag}>
-                                        <Text style={styles.keywordText}>열정</Text>
-                                    </View>
-                                    <View style={styles.keywordTag}>
-                                        <Text style={styles.keywordText}>기쁨</Text>
-                                    </View>
+                                    {(() => {
+                                        const keywords = selectedProfile ? getProfileKeywords(selectedProfile.title) : [];
+                                        const displayCount = keywordsExpanded ? keywords.length : 4;
+                                        const keywordsToShow = keywords.slice(0, displayCount);
+                                        
+                                        return keywordsToShow.map((keyword, index) => (
+                                            <View key={index} style={styles.keywordTag}>
+                                                <Text style={styles.keywordText}>{keyword}</Text>
+                                            </View>
+                                        ));
+                                    })()}
                                 </View>
                             </View>
                             

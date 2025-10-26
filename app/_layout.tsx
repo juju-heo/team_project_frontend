@@ -8,6 +8,7 @@ import 'react-native-reanimated';
 
 import { useColorScheme } from '@/components/useColorScheme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { I18nProvider } from '../contexts/i18nContext';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -81,11 +82,13 @@ function RootLayoutNav() {
   const theme = (override ?? systemScheme) === 'dark' ? DarkTheme : DefaultTheme;
 
   return (
-    <ThemeProvider value={theme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-      </Stack>
-    </ThemeProvider>
+    <I18nProvider>
+      <ThemeProvider value={theme}>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+        </Stack>
+      </ThemeProvider>
+    </I18nProvider>
   );
 }

@@ -11,7 +11,7 @@ export default function ProfileEditScreen() {
     const [birthDate, setBirthDate] = useState('1995-03-15');
     const [location, setLocation] = useState('경기도');
     const [bio, setBio] = useState('안녕하세요! 만나서 반가워요 😊');
-    const keywords = ['열정', '사랑', '기쁨'];
+    const keywords = ['친근함', '신뢰', '유머', '열정', '성실함', '긍정', '창의성', '도전'];
     const [imageUri, setImageUri] = useState<string | null>(null);
     const [showImageModal, setShowImageModal] = useState(false);
 
@@ -88,7 +88,7 @@ export default function ProfileEditScreen() {
 
                 {/* 키워드 */}
                 <View style={{ backgroundColor: '#fff', borderRadius: 14, padding: 16, borderWidth: 1, borderColor: '#eee', marginBottom: 16 }}>
-                    <Text style={{ fontWeight: '700', color: '#333', marginBottom: 6 }}>나의 키워드</Text>
+                    <Text style={{ fontWeight: '700', color: '#333', marginBottom: 6 }}>나의 사주 키워드</Text>
                     <Text style={{ color: '#777', fontSize: 12, marginBottom: 10 }}>사주를 기반으로 자동으로 설정된 키워드입니다</Text>
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
                         {keywords.map((k) => (

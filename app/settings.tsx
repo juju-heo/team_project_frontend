@@ -1,16 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, SafeAreaView, Switch, ScrollView, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, SafeAreaView, Switch, ScrollView, Alert, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useI18n } from '../contexts/i18nContext';
 
 export default function SettingsScreen() {
+    const { t, language, setLanguage } = useI18n();
     const [notificationsEnabled, setNotificationsEnabled] = useState(true);
     const [darkModeEnabled, setDarkModeEnabled] = useState(false);
-    const [matchAlertEnabled, setMatchAlertEnabled] = useState(true);
-    const [soundEnabled, setSoundEnabled] = useState(false);
     const [profilePublic, setProfilePublic] = useState(true);
     const [locationEnabled, setLocationEnabled] = useState(true);
+    const [selectedBackground, setSelectedBackground] = useState('default');
+    const [volume, setVolume] = useState(50);
+    const [micVolume, setMicVolume] = useState(50);
+    
+    // Expandable sections
+    const [soundExpanded, setSoundExpanded] = useState(false);
+    
+    // Language selection modal
+    const [showLanguageModal, setShowLanguageModal] = useState(false);
+    const [showBackgroundModal, setShowBackgroundModal] = useState(false);
 
     // load persisted toggles
     useEffect(() => {
@@ -21,10 +31,11 @@ export default function SettingsScreen() {
                     const parsed = JSON.parse(stored);
                     setNotificationsEnabled(parsed.notificationsEnabled ?? true);
                     setDarkModeEnabled(parsed.darkModeEnabled ?? false);
-                    setMatchAlertEnabled(parsed.matchAlertEnabled ?? true);
-                    setSoundEnabled(parsed.soundEnabled ?? false);
                     setProfilePublic(parsed.profilePublic ?? true);
                     setLocationEnabled(parsed.locationEnabled ?? true);
+                    setVolume(parsed.volume ?? 50);
+                    setMicVolume(parsed.micVolume ?? 50);
+                    setSelectedBackground(parsed.selectedBackground ?? 'default');
                 }
             } catch {}
         })();
@@ -32,9 +43,9 @@ export default function SettingsScreen() {
 
     // persist on change
     useEffect(() => {
-        const data = { notificationsEnabled, darkModeEnabled, matchAlertEnabled, soundEnabled, profilePublic, locationEnabled };
+        const data = { notificationsEnabled, darkModeEnabled, profilePublic, locationEnabled, volume, micVolume, selectedBackground };
         AsyncStorage.setItem('app_settings', JSON.stringify(data)).catch(() => {});
-    }, [notificationsEnabled, darkModeEnabled, matchAlertEnabled, soundEnabled, profilePublic, locationEnabled]);
+    }, [notificationsEnabled, darkModeEnabled, profilePublic, locationEnabled, volume, micVolume, selectedBackground]);
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
@@ -42,7 +53,7 @@ export default function SettingsScreen() {
                 <TouchableOpacity onPress={() => router.back()} style={{ paddingRight: 12, paddingVertical: 4 }}>
                     <Ionicons name="arrow-back" size={24} color="#333" />
                 </TouchableOpacity>
-                <Text style={{ fontSize: 18, fontWeight: '600', color: '#333' }}>설정</Text>
+                <Text style={{ fontSize: 18, fontWeight: '600', color: '#333' }}>{t('settings')}</Text>
             </View>
 
             <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
@@ -50,38 +61,45 @@ export default function SettingsScreen() {
                 <View style={{ backgroundColor: '#fff', borderRadius: 14, padding: 16, borderWidth: 1, borderColor: '#eee', marginBottom: 16 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
                         <Ionicons name="notifications-outline" size={20} color="#25a244" />
-                        <Text style={{ marginLeft: 8, fontWeight: '700', color: '#333' }}>알림 설정</Text>
+                        <Text style={{ marginLeft: 8, fontWeight: '700', color: '#333' }}>{t('notificationSettings')}</Text>
                     </View>
                     <View style={{ height: 1, backgroundColor: '#f0f0f0', marginVertical: 8 }} />
-                    <RowSwitch icon="notifications-outline" title="푸시 알림" subtitle="새로운 메시지 알림" value={notificationsEnabled} onChange={setNotificationsEnabled} />
+                    <RowSwitch icon="notifications-outline" title={t('pushNotifications')} subtitle={t('pushNotificationSubtitle')} value={notificationsEnabled} onChange={setNotificationsEnabled} />
                     <Separator />
-                    <RowSwitch icon="sparkles-outline" title="매칭 알림" subtitle="새로운 매칭 알림" value={matchAlertEnabled} onChange={setMatchAlertEnabled} />
-                    <Separator />
-                    <RowSwitch icon="volume-high-outline" title="소리" subtitle="알림음 재생" value={soundEnabled} onChange={setSoundEnabled} />
+                    <RowExpandable 
+                        icon="volume-high-outline" 
+                        title={t('sound')}
+                        expanded={soundExpanded}
+                        onToggle={() => setSoundExpanded(!soundExpanded)}
+                    >
+                        <RowSlider icon="volume-high-outline" title={t('volume')} value={volume} onChange={setVolume} />
+                        <Separator />
+                        <RowSlider icon="mic-outline" title={t('micVolume')} value={micVolume} onChange={setMicVolume} />
+                    </RowExpandable>
                 </View>
 
                 {/* 개인정보 및 보안 카드 */}
                 <View style={{ backgroundColor: '#fff', borderRadius: 14, padding: 16, borderWidth: 1, borderColor: '#eee', marginBottom: 16 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
                         <Ionicons name="shield-checkmark-outline" size={20} color="#25a244" />
-                        <Text style={{ marginLeft: 8, fontWeight: '700', color: '#333' }}>개인정보 및 보안</Text>
+                        <Text style={{ marginLeft: 8, fontWeight: '700', color: '#333' }}>{t('privacyAndSecurity')}</Text>
                     </View>
                     <View style={{ height: 1, backgroundColor: '#f0f0f0', marginVertical: 8 }} />
-                    <RowSwitch icon="eye-outline" title="프로필 공개" subtitle="다른 사용자에게 프로필 표시" value={profilePublic} onChange={setProfilePublic} />
+                    <RowSwitch icon="eye-outline" title={t('profilePublic')} subtitle={t('profilePublicSubtitle')} value={profilePublic} onChange={setProfilePublic} />
                     <Separator />
-                    <RowSwitch icon="location-outline" title="위치 정보" subtitle="지역 랭킹 참여" value={locationEnabled} onChange={setLocationEnabled} />
+                    <RowSwitch icon="location-outline" title={t('locationInfo')} subtitle={t('locationInfoSubtitle')} value={locationEnabled} onChange={setLocationEnabled} />
                     <Separator />
-                    <RowButton icon="close-circle-outline" title="차단 목록 관리" onPress={() => {}} />
+                    <RowButton icon="close-circle-outline" title={t('blockedList')} onPress={() => {}} />
                 </View>
 
                 {/* 앱 설정 카드 */}
                 <View style={{ backgroundColor: '#fff', borderRadius: 14, padding: 16, borderWidth: 1, borderColor: '#eee', marginBottom: 16 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
                         <Ionicons name="phone-portrait-outline" size={20} color="#25a244" />
-                        <Text style={{ marginLeft: 8, fontWeight: '700', color: '#333' }}>앱 설정</Text>
+                        <Text style={{ marginLeft: 8, fontWeight: '700', color: '#333' }}>{t('appSettings')}</Text>
                     </View>
                     <View style={{ height: 1, backgroundColor: '#f0f0f0', marginVertical: 8 }} />
-                    <RowSwitch icon="moon-outline" title="다크 모드" subtitle="어두운 테마 사용" value={darkModeEnabled} onChange={(v) => {
+                    <RowSwitch icon="moon-outline" title={t('darkMode')} subtitle={t('darkModeSubtitle')} value={darkModeEnabled} onChange={(v) => {
                         setDarkModeEnabled(v);
                         // notify theme change immediately
                         const bus = (global as any).__APP_EVENT_BUS__;
@@ -90,25 +108,86 @@ export default function SettingsScreen() {
                         }
                     }} />
                     <Separator />
-                    <RowButton icon="globe-outline" title="언어 (한국어)" onPress={() => Alert.alert('언어', '현재는 한국어만 지원합니다.')} />
+                    <RowButton icon="globe-outline" title={`${t('language')} (${language === 'ko' ? t('languageKorean') : t('languageEnglish')})`} onPress={() => setShowLanguageModal(true)} />
                     <Separator />
-                    <RowButton icon="color-palette-outline" title="채팅 배경 (기본)" onPress={() => Alert.alert('채팅 배경', '배경 변경 기능은 추후 제공 예정입니다.')} />
+                    <RowButton icon="color-palette-outline" title={`${t('chatBackground')} (${selectedBackground === 'default' ? t('chatBackgroundDefault') : selectedBackground})`} onPress={() => setShowBackgroundModal(true)} />
                 </View>
 
                 {/* 기타 카드 */}
                 <View style={{ backgroundColor: '#fff', borderRadius: 14, padding: 16, borderWidth: 1, borderColor: '#eee' }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
                         <Ionicons name="ellipsis-horizontal-circle-outline" size={20} color="#25a244" />
-                        <Text style={{ marginLeft: 8, fontWeight: '700', color: '#333' }}>기타</Text>
+                        <Text style={{ marginLeft: 8, fontWeight: '700', color: '#333' }}>{t('other')}</Text>
                     </View>
                     <View style={{ height: 1, backgroundColor: '#f0f0f0', marginVertical: 8 }} />
-                    <RowButton icon="trash-outline" title="캐시 데이터 삭제" onPress={async () => { await AsyncStorage.clear(); Alert.alert('완료', '캐시가 삭제되었습니다.'); }} />
+                    <RowButton icon="trash-outline" title={t('clearCache')} onPress={async () => { await AsyncStorage.clear(); Alert.alert(t('confirm'), t('clearCacheComplete')); }} />
                     <Separator />
-                    <RowButton icon="information-circle-outline" title="앱 정보" onPress={() => router.push('/about')} />
+                    <RowButton icon="information-circle-outline" title={t('appInfo')} onPress={() => router.push('/about')} />
                     <Separator />
-                    <Text style={{ textAlign: 'left', color: '#999', marginTop: 8 }}>버전 1.0.0</Text>
+                    <Text style={{ textAlign: 'left', color: '#999', marginTop: 8 }}>{t('version')} 1.0.0</Text>
                 </View>
             </ScrollView>
+
+            {/* Language Selection Modal */}
+            <Modal
+                visible={showLanguageModal}
+                transparent={true}
+                animationType="slide"
+                onRequestClose={() => setShowLanguageModal(false)}
+            >
+                <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' }}>
+                    <View style={{ backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20 }}>
+                        <Text style={{ fontSize: 20, fontWeight: '700', marginBottom: 20 }}>{t('selectLanguage')}</Text>
+                        <TouchableOpacity
+                            style={{ padding: 16, borderBottomWidth: 1, borderBottomColor: '#eee', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
+                            onPress={() => { setLanguage('ko'); setShowLanguageModal(false); }}
+                        >
+                            <Text style={{ fontSize: 16 }}>{t('languageKorean')}</Text>
+                            {language === 'ko' && <Ionicons name="checkmark" size={24} color="#25a244" />}
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={{ padding: 16, borderBottomWidth: 1, borderBottomColor: '#eee', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
+                            onPress={() => { setLanguage('en'); setShowLanguageModal(false); }}
+                        >
+                            <Text style={{ fontSize: 16 }}>{t('languageEnglish')}</Text>
+                            {language === 'en' && <Ionicons name="checkmark" size={24} color="#25a244" />}
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={{ marginTop: 20, padding: 16, backgroundColor: '#f0f0f0', borderRadius: 10, alignItems: 'center' }}
+                            onPress={() => setShowLanguageModal(false)}
+                        >
+                            <Text style={{ fontSize: 16, fontWeight: '600' }}>{t('cancel')}</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Background Selection Modal */}
+            <Modal
+                visible={showBackgroundModal}
+                transparent={true}
+                animationType="slide"
+                onRequestClose={() => setShowBackgroundModal(false)}
+            >
+                <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' }}>
+                    <View style={{ backgroundColor: '#fff', borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20 }}>
+                        <Text style={{ fontSize: 20, fontWeight: '700', marginBottom: 20 }}>{t('selectBackground')}</Text>
+                        <TouchableOpacity
+                            style={{ padding: 16, borderBottomWidth: 1, borderBottomColor: '#eee', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
+                            onPress={() => { setSelectedBackground('default'); setShowBackgroundModal(false); }}
+                        >
+                            <Text style={{ fontSize: 16 }}>{t('chatBackgroundDefault')}</Text>
+                            {selectedBackground === 'default' && <Ionicons name="checkmark" size={24} color="#25a244" />}
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={{ marginTop: 20, padding: 16, backgroundColor: '#f0f0f0', borderRadius: 10, alignItems: 'center' }}
+                            onPress={() => setShowBackgroundModal(false)}
+                        >
+                            <Text style={{ fontSize: 16, fontWeight: '600' }}>{t('cancel')}</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -119,7 +198,7 @@ function RowSwitch({ icon, title, subtitle, value, onChange }: { icon: any; titl
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Ionicons name={icon} size={20} color="#333" />
                 <View style={{ marginLeft: 10 }}>
-                    <Text style={{ fontSize: 16, color: '#333', fontWeight: '600' }}>{title}</Text>
+                    <Text style={{ fontSize: 16, color: '#333' }}>{title}</Text>
                     {subtitle ? <Text style={{ marginTop: 2, fontSize: 12, color: '#777' }}>{subtitle}</Text> : null}
                 </View>
             </View>
@@ -142,6 +221,56 @@ function RowButton({ icon, title, onPress }: { icon: any; title: string; onPress
 
 function Separator() {
     return <View style={{ height: 1, backgroundColor: '#eee' }} />;
+}
+
+function RowSlider({ icon, title, value, onChange }: { icon: any; title: string; value: number; onChange: (v: number) => void }) {
+    return (
+        <View style={{ paddingTop: 8, paddingBottom: 8 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                <Ionicons name={icon} size={20} color="#333" />
+                <View style={{ marginLeft: 10, flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Text style={{ fontSize: 16, color: '#333' }}>{title}</Text>
+                    <Text style={{ fontSize: 14, color: '#777' }}>{value}%</Text>
+                </View>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 30 }}>
+                <View style={{ flex: 1, height: 4, backgroundColor: '#eee', borderRadius: 2, marginRight: 10 }}>
+                    <View style={{ width: `${value}%`, height: 4, backgroundColor: '#25a244', borderRadius: 2 }} />
+                </View>
+                <TouchableOpacity 
+                    onPress={() => onChange(Math.max(0, value - 10))}
+                    style={{ width: 30, height: 30, justifyContent: 'center', alignItems: 'center' }}
+                >
+                    <Ionicons name="remove-circle-outline" size={24} color="#25a244" />
+                </TouchableOpacity>
+                <TouchableOpacity 
+                    onPress={() => onChange(Math.min(100, value + 10))}
+                    style={{ width: 30, height: 30, justifyContent: 'center', alignItems: 'center', marginLeft: 5 }}
+                >
+                    <Ionicons name="add-circle-outline" size={24} color="#25a244" />
+                </TouchableOpacity>
+            </View>
+        </View>
+    );
+}
+
+function RowExpandable({ icon, title, expanded, onToggle, children }: { icon: any; title: string; expanded: boolean; onToggle: () => void; children: React.ReactNode }) {
+    return (
+        <View>
+            <TouchableOpacity onPress={onToggle} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 12 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Ionicons name={icon} size={20} color="#333" />
+                    <Text style={{ marginLeft: 10, fontSize: 16, color: '#333' }}>{title}</Text>
+                </View>
+                <Ionicons name={expanded ? "chevron-up" : "chevron-down"} size={18} color="#999" />
+            </TouchableOpacity>
+            {expanded && (
+                <View style={{ paddingLeft: 30 }}>
+                    {children}
+                </View>
+            )}
+        </View>
+    );
 }
 
 

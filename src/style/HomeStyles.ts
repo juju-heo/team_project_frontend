@@ -162,6 +162,37 @@ const styles = StyleSheet.create({
         bottom: 0,
         width: '100%',
     },
+    
+    // 프로필 모달 스타일
+    keywordsSection: {
+        width: '100%',
+        marginBottom: 20,
+    },
+    sectionTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: 10,
+    },
+    keywordsContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+    },
+    keywordTag: {
+        backgroundColor: '#fff',
+        borderWidth: 1,
+        borderColor: '#4CAF50',
+        borderRadius: 15,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        marginRight: 8,
+        marginBottom: 8,
+    },
+    keywordText: {
+        fontSize: 14,
+        color: '#4CAF50',
+        fontWeight: '500',
+    },
 });
 
 export default styles;

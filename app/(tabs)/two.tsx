@@ -38,11 +38,38 @@ export default function ProfileScreen() {
     const [isFriendAdded, setIsFriendAdded] = React.useState(true); // 친구목록에서는 이미 친구이므로 true
     const [showImageModal, setShowImageModal] = React.useState(false);
     const [showRandomModal, setShowRandomModal] = React.useState(false);
+    // 사주 키워드 펼침 상태
+    const [keywordsExpanded, setKeywordsExpanded] = React.useState(false);
+    // 친구 프로필 모달의 키워드 펼침 상태
+    const [friendKeywordsExpanded, setFriendKeywordsExpanded] = React.useState(false);
+    
+    // 내 사주 키워드 (8개로 설정)
+    const myKeywords = [
+        '친근함', '신뢰', '유머', '열정', '성실함', '긍정', '창의성', '도전'
+    ];
+    
+    // 친구 키워드 가져오기 (고정된 키워드)
+    const getFriendKeywords = (friendName: string) => {
+        const allKeywords = ['사랑', '열정', '기쁨', '행복', '희망', '꿈', '자유', '평화', '건강', '부귀', '명예', '성공'];
+        
+        // 이름을 해시해서 고정된 키워드 가져오기
+        let hash = 0;
+        for (let i = 0; i < friendName.length; i++) {
+            hash = ((hash << 5) - hash) + friendName.charCodeAt(i);
+            hash = hash & hash;
+        }
+        
+        const count = 8; // 친구는 8개
+        const startIdx = Math.abs(hash) % (allKeywords.length - count + 1);
+        return allKeywords.slice(startIdx, startIdx + count);
+    };
 
     const openFriend = (friend: { id: number; name: string }) => {
         setSelectedFriend(friend);
         setIsHeartLiked(false); // 하트 상태 초기화
         setIsFriendAdded(true); // 친구 상태 초기화
+        setKeywordsExpanded(false); // 키워드 펼침 상태 초기화 (내 프로필)
+        setFriendKeywordsExpanded(false); // 친구 키워드 펼침 상태 초기화
         setShowProfileModal(true);
     };
 
@@ -82,16 +109,31 @@ export default function ProfileScreen() {
                                     <Text style={styles.statText}>42</Text>
                                 </View>
                             </View>
-                            <View style={styles.tagsContainer}>
-                                <View style={styles.tag}>
-                                    <Text style={styles.tagText}>열정</Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
+                                <View style={[styles.tagsContainer, { flex: 1 }]}>
+                                    {(() => {
+                                        const displayCount = keywordsExpanded ? myKeywords.length : Math.min(myKeywords.length, 4);
+                                        const keywordsToShow = myKeywords.slice(0, displayCount);
+                                        
+                                        return keywordsToShow.map((keyword, index) => (
+                                            <View key={index} style={styles.tag}>
+                                                <Text style={styles.tagText}>{keyword}</Text>
+                                            </View>
+                                        ));
+                                    })()}
                                 </View>
-                                <View style={styles.tag}>
-                                    <Text style={styles.tagText}>사랑</Text>
-                                </View>
-                                <View style={styles.tag}>
-                                    <Text style={styles.tagText}>기쁨</Text>
-                                </View>
+                                {myKeywords.length > 4 && (
+                                    <TouchableOpacity 
+                                        onPress={() => setKeywordsExpanded(!keywordsExpanded)}
+                                        style={{ marginLeft: 8, alignSelf: 'flex-start', paddingTop: 3 }}
+                                    >
+                                        <Ionicons 
+                                            name={keywordsExpanded ? "chevron-up" : "chevron-down"} 
+                                            size={18} 
+                                            color="#4CAF50" 
+                                        />
+                                    </TouchableOpacity>
+                                )}
                             </View>
                         </View>
                     </View>
@@ -272,60 +314,53 @@ export default function ProfileScreen() {
                             
                             {/* 사주 키워드 */}
                             <View style={{ width: '100%', marginBottom: 20 }}>
-                                <Text style={{
-                                    fontSize: 18,
-                                    fontWeight: 'bold',
-                                    color: '#333',
-                                    marginBottom: 10,
-                                }}>사주 키워드</Text>
-                                <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-                                    <View style={{
-                                        backgroundColor: '#fff',
-                                        borderWidth: 1,
-                                        borderColor: '#4CAF50',
-                                        borderRadius: 15,
-                                        paddingHorizontal: 12,
-                                        paddingVertical: 6,
-                                        marginRight: 8,
-                                        marginBottom: 8,
-                                    }}>
-                                        <Text style={{
-                                            fontSize: 14,
-                                            color: '#4CAF50',
-                                            fontWeight: '500',
-                                        }}>친근함</Text>
-                                    </View>
-                                    <View style={{
-                                        backgroundColor: '#fff',
-                                        borderWidth: 1,
-                                        borderColor: '#4CAF50',
-                                        borderRadius: 15,
-                                        paddingHorizontal: 12,
-                                        paddingVertical: 6,
-                                        marginRight: 8,
-                                        marginBottom: 8,
-                                    }}>
-                                        <Text style={{
-                                            fontSize: 14,
-                                            color: '#4CAF50',
-                                            fontWeight: '500',
-                                        }}>신뢰</Text>
-                                    </View>
-                                    <View style={{
-                                        backgroundColor: '#fff',
-                                        borderWidth: 1,
-                                        borderColor: '#4CAF50',
-                                        borderRadius: 15,
-                                        paddingHorizontal: 12,
-                                        paddingVertical: 6,
-                                        marginRight: 8,
-                                        marginBottom: 8,
-                                    }}>
-                                        <Text style={{
-                                            fontSize: 14,
-                                            color: '#4CAF50',
-                                            fontWeight: '500',
-                                        }}>유머</Text>
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                                    <Text style={{
+                                        fontSize: 18,
+                                        fontWeight: 'bold',
+                                        color: '#333',
+                                    }}>사주 키워드</Text>
+                                    {(() => {
+                                        const friendKeywords = selectedFriend ? getFriendKeywords(selectedFriend.name) : [];
+                                        return friendKeywords.length > 4 ? (
+                                            <TouchableOpacity 
+                                                onPress={() => setFriendKeywordsExpanded(!friendKeywordsExpanded)}
+                                            >
+                                                <Ionicons 
+                                                    name={friendKeywordsExpanded ? "chevron-up" : "chevron-down"} 
+                                                    size={20} 
+                                                    color="#4CAF50" 
+                                                />
+                                            </TouchableOpacity>
+                                        ) : null;
+                                    })()}
+                                </View>
+                                <View style={{ width: '100%' }}>
+                                    <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                                        {(() => {
+                                            const friendKeywords = selectedFriend ? getFriendKeywords(selectedFriend.name) : [];
+                                            const displayCount = friendKeywordsExpanded ? friendKeywords.length : 4;
+                                            const keywordsToShow = friendKeywords.slice(0, displayCount);
+                                            
+                                            return keywordsToShow.map((keyword, index) => (
+                                                <View key={index} style={{
+                                                    backgroundColor: '#fff',
+                                                    borderWidth: 1,
+                                                    borderColor: '#4CAF50',
+                                                    borderRadius: 15,
+                                                    paddingHorizontal: 12,
+                                                    paddingVertical: 6,
+                                                    marginRight: 8,
+                                                    marginBottom: 8,
+                                                }}>
+                                                    <Text style={{
+                                                        fontSize: 14,
+                                                        color: '#4CAF50',
+                                                        fontWeight: '500',
+                                                    }}>{keyword}</Text>
+                                                </View>
+                                            ));
+                                        })()}
                                     </View>
                                 </View>
                             </View>
