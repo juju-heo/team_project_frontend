@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, TextInput, ScrollView, KeyboardAvoidingView, Platform, Image, Modal, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, ScrollView, KeyboardAvoidingView, Platform, Image, Modal, Alert, SafeAreaView } from 'react-native';
 import { Ionicons, AntDesign } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import styles from '../src/style/ChatRoomStyles';
 import ImageModal from '../components/ImageModal';
@@ -13,6 +14,7 @@ interface Message {
     time: string;
     isMine: boolean;
     image?: string; // 이미지 URI (선택적)
+    isSystem?: boolean; // 시스템 메시지 여부
 }
 
 export default function ChatRoomScreen() {
@@ -28,17 +30,23 @@ export default function ChatRoomScreen() {
     
     // 채팅방에 들어왔을 때 읽음 처리
     useEffect(() => {
-        if (chatId !== null && typeof window !== 'undefined') {
-            // localStorage에서 기존 읽은 채팅방 목록 가져오기
-            const stored = localStorage.getItem('readChats');
-            const readChats: number[] = stored ? JSON.parse(stored) : [];
-            
-            // 현재 채팅방이 목록에 없으면 추가
-            if (!readChats.includes(chatId)) {
-                readChats.push(chatId);
-                localStorage.setItem('readChats', JSON.stringify(readChats));
+        const markAsRead = async () => {
+            if (chatId !== null) {
+                try {
+                    const stored = await AsyncStorage.getItem('readChats');
+                    const readChats: number[] = stored ? JSON.parse(stored) : [];
+                    
+                    // 현재 채팅방이 목록에 없으면 추가
+                    if (!readChats.includes(chatId)) {
+                        readChats.push(chatId);
+                        await AsyncStorage.setItem('readChats', JSON.stringify(readChats));
+                    }
+                } catch (error) {
+                    console.error('읽음 처리 실패:', error);
+                }
             }
-        }
+        };
+        markAsRead();
     }, [chatId]);
     
     // 메시지 입력 상태
@@ -79,7 +87,8 @@ export default function ChatRoomScreen() {
             id: messages.length + 1,
             text: topic,
             time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
-            isMine: true
+            isMine: false,
+            isSystem: true // 시스템 메시지로 표시
         };
         
         setMessages([...messages, newMessage]);
@@ -258,6 +267,7 @@ export default function ChatRoomScreen() {
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             keyboardVerticalOffset={0}
         >
+        <SafeAreaView style={{ flex: 1 }} edges={['bottom']}>
             {/* 상단 헤더 */}
             <View style={styles.header}>
                 <TouchableOpacity 
@@ -265,7 +275,16 @@ export default function ChatRoomScreen() {
                     style={styles.backButton}
                 >
                     {isRandom ? (
-                        <Ionicons name="close" size={24} color="#E53935" />
+                        <View style={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: 20,
+                            backgroundColor: '#E53935',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                        }}>
+                            <Ionicons name="close" size={20} color="#fff" />
+                        </View>
                     ) : (
                         <Ionicons name="arrow-back" size={24} color="#333" />
                     )}
@@ -288,10 +307,17 @@ export default function ChatRoomScreen() {
                 <View style={styles.headerRight}>
                     {isRandom && (
                         <TouchableOpacity 
-                            style={styles.reportButton}
+                            style={{
+                                width: 40,
+                                height: 40,
+                                borderRadius: 20,
+                                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                            }}
                             onPress={() => router.push('/report')}
                         >
-                            <Ionicons name="flag" size={24} color="#FF9800" />
+                            <Ionicons name="flag" size={20} color="#FF9800" />
                         </TouchableOpacity>
                     )}
                 </View>
@@ -328,7 +354,32 @@ export default function ChatRoomScreen() {
                     </View>
                 )}
                 
-                {messages.map((message) => (
+                {messages.map((message) => {
+                    // 시스템 메시지인 경우 중앙에 표시
+                    if (message.isSystem) {
+                        return (
+                            <View key={message.id} style={{ alignItems: 'center', marginVertical: 15 }}>
+                                <View style={{
+                                    backgroundColor: '#E8F5E9',
+                                    borderRadius: 12,
+                                    paddingVertical: 8,
+                                    paddingHorizontal: 16,
+                                    maxWidth: '80%',
+                                }}>
+                                    <Text style={{
+                                        fontSize: 14,
+                                        color: '#2E7D32',
+                                        textAlign: 'center',
+                                        lineHeight: 20
+                                    }}>
+                                        {message.text}
+                                    </Text>
+                                </View>
+                            </View>
+                        );
+                    }
+
+                    return (
                     <View 
                         key={message.id} 
                         style={[
@@ -404,14 +455,19 @@ export default function ChatRoomScreen() {
                             </Text>
                         </View>
                     </View>
-                ))}
+                    );
+                })}
             </ScrollView>
 
             {/* 하단 입력 영역 */}
             <View style={styles.inputContainer}>
                 <TouchableOpacity 
                     style={styles.topicButton}
-                    onPress={() => setShowTopicModal(true)}
+                    onPress={() => {
+                        // 랜덤으로 대화주제 선택해서 바로 채팅창에 전송
+                        const randomTopic = conversationTopics[Math.floor(Math.random() * conversationTopics.length)];
+                        selectTopic(randomTopic);
+                    }}
                 >
                     <Text style={{ fontSize: 20 }}>💡</Text>
                 </TouchableOpacity>
@@ -750,79 +806,6 @@ export default function ChatRoomScreen() {
                 userName={userName}
             />
 
-            {/* 대화주제 추천 말풍선 */}
-            {showTopicModal && (
-                <TouchableOpacity 
-                    style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        backgroundColor: 'transparent',
-                        zIndex: 999,
-                    }}
-                    activeOpacity={1}
-                    onPress={() => setShowTopicModal(false)}
-                >
-                    <View style={{
-                        position: 'absolute',
-                        bottom: 80, // 입력 영역 위에 위치
-                        left: 20,
-                        backgroundColor: '#fff',
-                        borderRadius: 12,
-                        padding: 12,
-                        maxWidth: 280,
-                        shadowColor: '#000',
-                        shadowOffset: {
-                            width: 0,
-                            height: 2,
-                        },
-                        shadowOpacity: 0.25,
-                        shadowRadius: 3.84,
-                        elevation: 5,
-                        zIndex: 1000,
-                    }}>
-                        {/* 말풍선 꼬리 */}
-                        <View style={{
-                            position: 'absolute',
-                            bottom: -8,
-                            left: 20,
-                            width: 0,
-                            height: 0,
-                            borderLeftWidth: 8,
-                            borderRightWidth: 8,
-                            borderTopWidth: 8,
-                            borderLeftColor: 'transparent',
-                            borderRightColor: 'transparent',
-                            borderTopColor: '#fff',
-                        }} />
-                        
-                        <ScrollView style={{ maxHeight: 200 }}>
-                            {conversationTopics.map((topic, index) => (
-                                <TouchableOpacity
-                                    key={index}
-                                    style={{
-                                        paddingVertical: 8,
-                                        paddingHorizontal: 4,
-                                        borderBottomWidth: index < conversationTopics.length - 1 ? 1 : 0,
-                                        borderBottomColor: '#f0f0f0',
-                                    }}
-                                    onPress={() => selectTopic(topic)}
-                                >
-                                    <Text style={{
-                                        fontSize: 13,
-                                        color: '#333',
-                                        lineHeight: 18
-                                    }}>
-                                        {topic}
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
-                        </ScrollView>
-                    </View>
-                </TouchableOpacity>
-            )}
 
             {/* 나가기 확인 모달 */}
             {showExitConfirmModal && (
@@ -911,6 +894,7 @@ export default function ChatRoomScreen() {
                     </View>
                 </Modal>
             )}
+        </SafeAreaView>
         </KeyboardAvoidingView>
     );
 }

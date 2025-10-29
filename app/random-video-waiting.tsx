@@ -35,12 +35,13 @@ const RandomVideoWaitingScreen = () => {
 
         return () => rotateAnimation.stop();
     }, []);
-
+    
+    // 회전 각도 설정
     const rotateInterpolate = rotationValue.interpolate({
         inputRange: [0, 1],
         outputRange: ['0deg', '360deg'],
     });
-
+    
     // 매칭 시뮬레이션 (5-10초 후 매칭)
     useEffect(() => {
         const matchTimer = setTimeout(() => {
@@ -91,7 +92,7 @@ const RandomVideoWaitingScreen = () => {
                         ]}
                     >
                         <View style={styles.innerCircle}>
-                            <Ionicons name="videocam" size={40} color="#4CAF50" />
+                            <Ionicons name="videocam" size={40} color="#fff" />
                         </View>
                     </Animated.View>
                 </View>

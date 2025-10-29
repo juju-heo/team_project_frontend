@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ScrollView, StyleSheet, Text, View, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { Ionicons, AntDesign } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from '../src/style/ChatStyles';
 import ImageModal from '../components/ImageModal';
 
@@ -18,27 +19,27 @@ export default function ChatScreen() {
     
     // 컴포넌트가 마운트될 때 읽은 채팅방 목록 불러오기
     useEffect(() => {
-        // localStorage에서 읽은 채팅방 목록 불러오기
-        if (typeof window !== 'undefined') {
-            const stored = localStorage.getItem('readChats');
-            if (stored) {
-                setReadChats(JSON.parse(stored));
-            }
-        }
+        loadReadChats();
     }, []);
     
     // 화면이 포커스될 때마다 읽은 채팅방 목록 업데이트
     useFocusEffect(
         React.useCallback(() => {
-            // localStorage에서 읽은 채팅방 목록 불러오기
-            if (typeof window !== 'undefined') {
-                const stored = localStorage.getItem('readChats');
-                if (stored) {
-                    setReadChats(JSON.parse(stored));
-                }
-            }
+            loadReadChats();
         }, [])
     );
+    
+    // 읽은 채팅방 목록 불러오기 함수
+    const loadReadChats = async () => {
+        try {
+            const stored = await AsyncStorage.getItem('readChats');
+            if (stored) {
+                setReadChats(JSON.parse(stored));
+            }
+        } catch (error) {
+            console.error('채팅 목록 로드 실패:', error);
+        }
+    };
     
     // 채팅 목록 데이터
     const chatData = [

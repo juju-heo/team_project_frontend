@@ -112,15 +112,6 @@ const FriendsListScreen = () => {
             </View>
             <View style={styles.friendInfo}>
                 <Text style={styles.friendName}>{friend.name}</Text>
-                <View style={styles.friendStatus}>
-                    <View style={[
-                        styles.statusDot,
-                        friend.isOnline ? styles.onlineDot : styles.offlineDot
-                    ]} />
-                    <Text style={styles.statusText}>
-                        {friend.isOnline ? '온라인' : '오프라인'}
-                    </Text>
-                </View>
             </View>
             <TouchableOpacity 
                 style={styles.messageButton}

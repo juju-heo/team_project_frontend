@@ -138,8 +138,9 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: '#fff',
-        paddingVertical: 10,
+        paddingVertical: 15,
         paddingHorizontal: 15,
+        paddingBottom: 30, // 안드로이드 네비게이션 바와 겹치지 않도록 여백 추가
         borderTopWidth: 1,
         borderTopColor: '#e0e0e0',
     },

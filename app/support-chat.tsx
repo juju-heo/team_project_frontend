@@ -52,7 +52,7 @@ export default function SupportChatScreen() {
             />
 
             {/* 입력 바 */}
-            <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', paddingHorizontal: 12, paddingVertical: 8, borderTopWidth: 1, borderTopColor: '#eee' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', paddingHorizontal: 12, paddingVertical: 15, paddingBottom: 35, borderTopWidth: 1, borderTopColor: '#eee' }}>
                 <TextInput
                     value={input}
                     onChangeText={setInput}

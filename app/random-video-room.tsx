@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Image, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, Image, Modal, Alert } from 'react-native';
 import { Ionicons, AntDesign } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from '../src/style/RandomVideoRoomStyles';
 import ImageModal from '../components/ImageModal';
 
@@ -19,6 +20,7 @@ const RandomVideoRoomScreen = () => {
     const [showProfileModal, setShowProfileModal] = useState(false);
     const [isHeartLiked, setIsHeartLiked] = useState(false);
     const [isFriendAdded, setIsFriendAdded] = useState(false);
+    const [isFriendRequestSent, setIsFriendRequestSent] = useState(false);
     const [showImageModal, setShowImageModal] = useState(false);
     const [showReportModal, setShowReportModal] = useState(false);
     const [showExitConfirmModal, setShowExitConfirmModal] = useState(false);
@@ -52,10 +54,16 @@ const RandomVideoRoomScreen = () => {
         setIsMicrophoneOn(prev => !prev);
     };
 
-    const handleProfileClick = () => {
+    const handleProfileClick = async () => {
         setShowProfileModal(true);
         setIsHeartLiked(false);
         setIsFriendAdded(false);
+        
+        // 친구 요청 상태 확인
+        const pendingRequests = await AsyncStorage.getItem('friend_requests');
+        const requests = pendingRequests ? JSON.parse(pendingRequests) : [];
+        const hasRequestSent = requests.some((req: any) => req.userName === partnerProfile.title);
+        setIsFriendRequestSent(hasRequestSent);
     };
 
     const handleReport = () => {
@@ -187,14 +195,37 @@ const RandomVideoRoomScreen = () => {
                                     />
                                 </TouchableOpacity>
                                 
-                                {!isFriendAdded ? (
+                                {!isFriendAdded && !isFriendRequestSent ? (
                                     // 친구 추가 버튼
                                     <TouchableOpacity 
                                         style={styles.addFriendButton}
-                                        onPress={() => setIsFriendAdded(true)}
+                                        onPress={async () => {
+                                            // 친구 요청 저장
+                                            const pendingRequests = await AsyncStorage.getItem('friend_requests');
+                                            const requests = pendingRequests ? JSON.parse(pendingRequests) : [];
+                                            const newRequest = {
+                                                userName: partnerProfile.title,
+                                                avatarText: partnerProfile.title.substring(0, 2),
+                                                id: Date.now(),
+                                                status: 'pending'
+                                            };
+                                            requests.push(newRequest);
+                                            await AsyncStorage.setItem('friend_requests', JSON.stringify(requests));
+                                            setIsFriendRequestSent(true);
+                                            Alert.alert('요청 전송', '친구 요청이 전송되었습니다.');
+                                        }}
                                     >
                                         <Ionicons name="person-add" size={20} color="#4CAF50" />
                                         <Text style={styles.addFriendText}>친구 추가</Text>
+                                    </TouchableOpacity>
+                                ) : !isFriendAdded && isFriendRequestSent ? (
+                                    // 친구 요청 전송됨 상태
+                                    <TouchableOpacity 
+                                        style={[styles.addFriendButton, { opacity: 0.6 }]}
+                                        disabled={true}
+                                    >
+                                        <Ionicons name="checkmark-circle" size={20} color="#4CAF50" />
+                                        <Text style={styles.addFriendText}>친구 요청 전송됨</Text>
                                     </TouchableOpacity>
                                 ) : (
                                     // 친구 추가된 상태 - 채팅과 친구 삭제 버튼

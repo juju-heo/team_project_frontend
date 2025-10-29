@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, Text, View, TouchableOpacity, Modal } from 'react-native';
+import { ScrollView, Text, View, TouchableOpacity, Modal, Alert } from 'react-native';
 // 아이콘 사용을 위한 임포트 (expo-vector-icons)
 import { AntDesign, Feather, Ionicons } from '@expo/vector-icons';
 // 스타일 임포트
@@ -27,6 +27,7 @@ const HomeScreen = () => {
     const [selectedProfile, setSelectedProfile] = useState<RankingItem | null>(null);
     const [isHeartLiked, setIsHeartLiked] = useState(false);
     const [isFriendAdded, setIsFriendAdded] = useState(false);
+    const [isFriendRequestSent, setIsFriendRequestSent] = useState(false);
     const [showImageModal, setShowImageModal] = useState(false);
     // 사주 키워드 펼침 상태
     const [keywordsExpanded, setKeywordsExpanded] = useState(false);
@@ -143,14 +144,20 @@ const HomeScreen = () => {
     // 개별 랭킹 카드를 렌더링하는 컴포넌트 함수
     const renderRankingCard = (item: RankingItem, index: number) => (
         <TouchableOpacity 
-            key={item.id} 
             style={styles.rankingCard}
-            onPress={() => {
+            onPress={async () => {
                 console.log('랭킹 카드 클릭:', item.title);
                 setSelectedProfile(item);
                 setIsHeartLiked(false); // 하트 상태 초기화
                 setIsFriendAdded(false); // 친구 상태 초기화
                 setKeywordsExpanded(false); // 키워드 펼침 상태 초기화
+                
+                // 친구 요청 상태 확인
+                const pendingRequests = await AsyncStorage.getItem('friend_requests');
+                const requests = pendingRequests ? JSON.parse(pendingRequests) : [];
+                const hasRequestSent = requests.some((req: any) => req.userName === item.title);
+                setIsFriendRequestSent(hasRequestSent);
+                
                 setShowProfileModal(true);
                 console.log('프로필 모달 상태:', showProfileModal);
             }}
@@ -273,7 +280,11 @@ const HomeScreen = () => {
                         <Text style={styles.rankingHeaderText}>전체 하트 랭킹</Text>
                     </View>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.rankingScroll}>
-                        {rankingData.map((item, index) => renderRankingCard(item, index))}
+                        {rankingData.map((item, index) => (
+                            <View key={`ranking-${item.id}`}>
+                                {renderRankingCard(item, index)}
+                            </View>
+                        ))}
                     </ScrollView>
                 </View>
 
@@ -284,7 +295,11 @@ const HomeScreen = () => {
                         <Text style={styles.rankingHeaderText}>이달의 랭킹</Text>
                     </View>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.rankingScroll}>
-                        {monthlyRankingData.map((item, index) => renderRankingCard(item, index))}
+                        {monthlyRankingData.map((item, index) => (
+                            <View key={`monthly-${item.id}`}>
+                                {renderRankingCard(item, index)}
+                            </View>
+                        ))}
                     </ScrollView>
                 </View>
 
@@ -295,7 +310,11 @@ const HomeScreen = () => {
                         <Text style={styles.rankingHeaderText}>우리 지역 랭킹</Text>
                     </View>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.rankingScroll}>
-                        {localRankingData.map((item, index) => renderRankingCard(item, index))}
+                        {localRankingData.map((item, index) => (
+                            <View key={`local-${item.id}`}>
+                                {renderRankingCard(item, index)}
+                            </View>
+                        ))}
                     </ScrollView>
                 </View>
                 
@@ -459,14 +478,37 @@ const HomeScreen = () => {
                                     />
                                 </TouchableOpacity>
                                 
-                                {!isFriendAdded ? (
+                                {!isFriendAdded && !isFriendRequestSent ? (
                                     // 친구 추가 버튼
                                     <TouchableOpacity 
                                         style={styles.addFriendButton}
-                                        onPress={() => setIsFriendAdded(true)}
+                                        onPress={async () => {
+                                            // 친구 요청 저장
+                                            const pendingRequests = await AsyncStorage.getItem('friend_requests');
+                                            const requests = pendingRequests ? JSON.parse(pendingRequests) : [];
+                                            const newRequest = {
+                                                userName: selectedProfile?.title,
+                                                avatarText: selectedProfile?.title.substring(0, 2) || '',
+                                                id: Date.now(),
+                                                status: 'pending'
+                                            };
+                                            requests.push(newRequest);
+                                            await AsyncStorage.setItem('friend_requests', JSON.stringify(requests));
+                                            setIsFriendRequestSent(true);
+                                            Alert.alert('요청 전송', '친구 요청이 전송되었습니다.');
+                                        }}
                                     >
                                         <Ionicons name="person-add" size={20} color="#4CAF50" />
                                         <Text style={styles.addFriendText}>친구 추가</Text>
+                                    </TouchableOpacity>
+                                ) : !isFriendAdded && isFriendRequestSent ? (
+                                    // 친구 요청 전송됨 상태
+                                    <TouchableOpacity 
+                                        style={[styles.addFriendButton, { opacity: 0.6 }]}
+                                        disabled={true}
+                                    >
+                                        <Ionicons name="checkmark-circle" size={20} color="#4CAF50" />
+                                        <Text style={styles.addFriendText}>친구 요청 전송됨</Text>
                                     </TouchableOpacity>
                                 ) : (
                                     // 친구 추가된 상태 - 채팅과 친구 삭제 버튼
