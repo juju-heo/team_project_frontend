@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         paddingVertical: 15,
         paddingHorizontal: 15,
-        paddingBottom: 30, // 안드로이드 네비게이션 바와 겹치지 않도록 여백 추가
+        paddingBottom: 15, // 키보드가 올라올 때 자동으로 조정되도록 여백 감소
         borderTopWidth: 1,
         borderTopColor: '#e0e0e0',
     },

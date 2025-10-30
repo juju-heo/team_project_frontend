@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, Text, View, TouchableOpacity, Modal, Alert } from 'react-native';
+import { ScrollView, Text, View, TouchableOpacity, Modal, Alert, Image } from 'react-native';
 // 아이콘 사용을 위한 임포트 (expo-vector-icons)
 import { AntDesign, Feather, Ionicons } from '@expo/vector-icons';
 // 스타일 임포트
@@ -17,6 +17,7 @@ interface RankingItem {
     title: string;
     score: number;
     icon: string;
+    image?: any; // 프로필 이미지 (선택적)
 }
 
 const HomeScreen = () => {
@@ -88,27 +89,51 @@ const HomeScreen = () => {
         router.push('/notifications');
     };
     
-    // 랭킹 데이터를 위한 더미 배열 (실제 데이터는 서버에서 받아와야 합니다)
+    //전체 하트 랭킹 프로필 이미지 URL (여기에 이미지 URL을 입력하세요)
+    const karinaImageUrl = 'https://search.pstatic.net/sunny/?src=http%3A%2F%2Ffile3.instiz.net%2Fdata%2Fcached_img%2Fupload%2F2025%2F02%2F02%2F18%2Fe52565f0268b42e8e26fc6ab6e61f723.jpg&type=sc960_832'; // 여기에 실제 이미지 URL을 넣어주세요
+    const yunaImageUrl = 'https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyNDAxMTJfODUg%2FMDAxNzA1MDI4MjM0Mzk4.wk0I4effUHgI_X5H6h-L5ndHF93eKJbASvKiuAK5N50g.AMOKzT8m11gAjVq8AcCeDiSQ7meVLDl7uwrD9kUdkuwg.JPEG.gooddaykiki%2FIMG_1332.JPG&type=sc960_832'; // 여기에 실제 이미지 URL을 넣어주세요
+    const winterImageUrl = 'https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyNDA2MThfMTI2%2FMDAxNzE4NzE1MzY5MzE2.XnAiCKUtZEdp2tDd1uM2DzXN4NMmcTYmirw_Bu3PPQkg.LyIbnUReCguvcpC_tQgP8W2HDFpfEH0FYgczZC-shH8g.JPEG%2F5750d7f52ba30dd42c905601803107c3.jpg&type=a340'
+    const sulyunImageUrl = 'https://search.pstatic.net/common/?src=http%3A%2F%2Fimgnews.naver.net%2Fimage%2F109%2F2022%2F12%2F13%2F0004757144_001_20221213185803598.jpg&type=a340'
+    const kazuhaImageUrl ='https://search.pstatic.net/sunny/?src=http%3A%2F%2Ffile3.instiz.net%2Fdata%2Fcached_img%2Fupload%2F2022%2F12%2F25%2F3%2F6822dad56c54d678147b15b771cce57c.jpg&type=sc960_832'
+
+
+    //전체 랭킹 데이터를 위한 더미 배열 (실제 데이터는 서버에서 받아와야 합니다)
     const rankingData = [
-        { id: 1, title: '스타✨', score: 15420, icon: 'person' },
-        { id: 2, title: '달빛소녀', score: 12890, icon: 'person' },
-        { id: 3, title: '햇살왕자', score: 11250, icon: 'person' },
-        { id: 4, title: '바람처럼', score: 9870, icon: 'person' },
+        { id: 1, title: '카리나', score: 15420, icon: 'person', image: karinaImageUrl },
+        { id: 2, title: '유나', score: 12890, icon: 'person', image: yunaImageUrl },
+        { id: 3, title: '윈터', score: 11250, icon: 'person', image: winterImageUrl },
+        { id: 4, title: '설윤', score: 9870, icon: 'person', image: sulyunImageUrl },
+        { id: 5, title: '카즈하', score: 9200, icon: 'person' , image: kazuhaImageUrl },
         // 데이터가 더 많다면 이 배열에 계속 추가됩니다.
     ];
 
+    //이달의 랭킹 프로필 이미지 URL (여기에 이미지 URL을 입력하세요)
+    const chaewonImageUrl = 'https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyMzAyMDFfMjgg%2FMDAxNjc1MjU1OTI0NDU4.FGEfyFN91NCetcBca1GLfsCrbqJ-fT8ssFzEue2xLacg.5LmwExujHWFo3IckaDikm_Q1dmJ3Rn6_O-uK6TI35q4g.JPEG.jhs020329%2Fkchaewon.lesserafim%25A3%25AD07%25A3%25AD01%25A3%25AD2023%25A3%25AD0008.jpg&type=sc960_832'; // 여기에 실제 이미지 URL을 넣어주세요
+    const anImageUrl = 'https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyNTA5MTBfMTIz%2FMDAxNzU3NDM2MDUxNDQy.RLLyJVme3Hr50QxdxZDtFytpitnTFse9QQRjBL9A08Eg.b6SJcJg1Fjxz9uLIBhghXUKl3UjpsOQB6mYKiwSzfhAg.JPEG%2F0000278857%25A3%25DF001%25A3%25DF20250901194515625.jpg&type=sc960_832'
+    const julieImageUrl = 'https://search.pstatic.net/sunny/?src=https%3A%2F%2Fimg-cdn.theqoo.net%2FjoYDjc.jpg&type=sc960_832'
+    const yuyunImageUrl = 'https://search.pstatic.net/sunny/?src=http%3A%2F%2Ffile3.instiz.net%2Fdata%2Fcached_img%2Fupload%2F2022%2F02%2F04%2F15%2F4fbeedcee7f673e141dcdb3234fff3b6.jpg&type=a340'
+    const natiImageUrl = 'https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyNDAxMTRfMTA4%2FMDAxNzA1MjI1NDE1NzYy.v5CQhWcExHieBvdB7k4G7BrTjaMrA_lmF7p9NS9gfjcg.brwb6KYmfkdrvKEWny-5aATE-uq2BZ8IPjMg8axk6esg.JPEG.idhair3377%2FKakaoTalk%25A3%25DF20240102%25A3%25DF202648326%25A3%25DF02.jpg&type=sc960_832'
+    //이달의 랭킹 데이터를 위한 더미 배열
     const monthlyRankingData = [
-        { id: 1, title: '12월의 별', score: 8650, icon: 'person' },
-        { id: 2, title: '크리스마스', score: 7980, icon: 'person' },
-        { id: 3, title: '연말대박', score: 7320, icon: 'person' },
-        { id: 4, title: '겨울왕자', score: 6850, icon: 'person' },
+        { id: 1, title: '김채원', score: 8650, icon: 'person' , image: chaewonImageUrl },
+        { id: 2, title: '이안', score: 7980, icon: 'person' , image: anImageUrl },
+        { id: 3, title: '쥴리', score: 7320, icon: 'person' , image: julieImageUrl },
+        { id: 4, title: '김유연', score: 6850, icon: 'person', image: yuyunImageUrl },
+        { id: 5, title: '나띠', score: 6200, icon: 'person', image: natiImageUrl},
     ];
-    
+    //우리 지역 랭킹 프로필 이미지 URL
+    const hankang = 'https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyNTA5MThfMTg0%2FMDAxNzU4MTcwMzA0MTU3.GXbLc0CJQrjuD-B1qctDtX-nArPIat2PRGyTBQ637qEg.vr_k_nYiLgcZyam9d95TqxqE_eu28lMh9O5X4HUO69Qg.JPEG%2F%25B4%25D9%25BF%25EE%25B7%25CE%25B5%25E5%25A3%25AD5.jpeg&type=sc960_832'
+    const businessman = 'https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyMzA0MTdfNzMg%2FMDAxNjgxNzI5NjQ3MTU4._rNBN9aW2S7gzXgf2K3JNxZZbNESHfIdBg5cVvSOILgg.PzlFD74YoCNgED2QhdArWuIHFapoHz-KMiumHApo5Y8g.JPEG.kuj3423%2FIMG_8757.jpg&type=sc960_832'
+    const hongpeople = 'https://scontent-ssn1-1.cdninstagram.com/v/t51.82787-15/568223023_18031780538733701_5521788549443438675_n.jpg?stp=dst-jpg_e35_p1080x1080_tt6&_nc_cat=110&ig_cache_key=Mzc0OTQzMDM2OTk1MTc5NzE1OQ%3D%3D.3-ccb1-7&ccb=1-7&_nc_sid=58cdad&efg=eyJ2ZW5jb2RlX3RhZyI6InhwaWRzLjE0NDB4MTg3Ny5zZHIuQzMifQ%3D%3D&_nc_ohc=pfwUqf0qTB8Q7kNvwEPX8Nr&_nc_oc=AdkvYrRfW1tcmzP8f-JUMVgfpUUbmYIAcrZczXBv1r7KjTEiurEHmAXK4hPaUVTyfRU&_nc_ad=z-m&_nc_cid=0&_nc_zt=23&_nc_ht=scontent-ssn1-1.cdninstagram.com&_nc_gid=UrFwVhE0N93uHOXJEisYPA&oh=00_AfcdjFzXKto28OP2wCU45uxbDbq82lLHGMSQhSF06AajsQ&oe=6907F148'
+    const seoulseoul = 'https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2FMjAyNDA5MTJfMTI4%2FMDAxNzI2MTIxODIwNTQ0.8Aaxt2H_uaSFDHgNnrnIkZN9Zoi72rsoVcqMBkNrLxwg.yLmfkwykRwCLuvC5aohxhtxHuxdCLBFVR1sA3SHf328g.JPEG%2F20220515_183434.jpg&type=sc960_832'
+    const sinchon = 'https://search.pstatic.net/common/?src=http%3A%2F%2Fcafefiles.naver.net%2FMjAxOTA5MDVfMjE5%2FMDAxNTY3NjgwMDc5Mzk1.0MHFWyM4gXp_QLmWU4Sz4u_6VueWXWujOH2NXP2vy70g.vM-11sAkx726DCR2CG4H0_z5364IQEsp4GNkCJpuAacg.JPEG%2F1%25C0%25CF%25C2%25F7-10.jpg&type=sc960_832'
+    //우리 지역 랭킹 데이터를 위한 더미 배열
     const localRankingData = [
-        { id: 1, title: '서울킹👑', score: 3420, icon: 'person' },
-        { id: 2, title: '한강뷰', score: 2890, icon: 'person' },
-        { id: 3, title: '홍대오빠', score: 2650, icon: 'person' },
-        { id: 4, title: '이태원girl', score: 2420, icon: 'person' },
+        { id: 1, title: '홍대피플', score: 2650, icon: 'person' , image: hongpeople },
+        { id: 2, title: '한강뷰', score: 3420, icon: 'person', image: hankang },
+        { id: 3, title: '비즈니스맨', score: 2890, icon: 'person' , image: businessman },
+        { id: 4, title: '서울숲', score: 2420, icon: 'person' , image: seoulseoul },
+        { id: 5, title: '신촌을 못가', score: 2300, icon: 'person' , image: sinchon },
     ];
 
     // 사주 키워드 데이터 (프로필별로 고정)
@@ -164,7 +189,15 @@ const HomeScreen = () => {
         >
             <Text style={styles.rankingNumber}>{index + 1}</Text>
             <View style={styles.rankingAvatar}>
-                <Text style={styles.rankingAvatarText}>{item.title.substring(0, 2)}</Text>
+                {item.image ? (
+                    <Image 
+                        source={typeof item.image === 'string' ? { uri: item.image } : item.image} 
+                        style={styles.rankingAvatarImage}
+                        resizeMode="cover"
+                    />
+                ) : (
+                    <Text style={styles.rankingAvatarText}>{item.title.substring(0, 2)}</Text>
+                )}
             </View>
             <Text style={styles.rankingTitle} numberOfLines={1}>{item.title}</Text>
             <View style={styles.heartScore}>
@@ -209,7 +242,7 @@ const HomeScreen = () => {
                         <AntDesign name="star" size={24} color="#4CAF50" />
                         <View style={styles.sajuTextContainer}>
                             <Text style={styles.sajuInfoTitle}>내 사주 정보</Text>
-                            <Text style={styles.sajuInfoDetail}>1995년 3월 15일 • 목요일</Text>
+                            <Text style={styles.sajuInfoDetail}>2003년 3월 18일 • 화요일</Text>
                         </View>
                     </View>
                     <AntDesign 
@@ -402,7 +435,15 @@ const HomeScreen = () => {
                                 style={styles.profileAvatar}
                                 onPress={() => setShowImageModal(true)}
                             >
-                                <Ionicons name="person" size={60} color="#fff" />
+                                {selectedProfile?.image ? (
+                                    <Image 
+                                        source={typeof selectedProfile.image === 'string' ? { uri: selectedProfile.image } : selectedProfile.image} 
+                                        style={styles.profileAvatarImage}
+                                        resizeMode="cover"
+                                    />
+                                ) : (
+                                    <Ionicons name="person" size={60} color="#fff" />
+                                )}
                             </TouchableOpacity>
                             
                             {/* 사용자 정보 */}
@@ -548,6 +589,7 @@ const HomeScreen = () => {
                 visible={showImageModal}
                 onClose={() => setShowImageModal(false)}
                 imageUri={null}
+                imageSource={selectedProfile?.image}
                 userName={selectedProfile?.title || '사용자'}
             />
 

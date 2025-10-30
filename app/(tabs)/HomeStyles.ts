@@ -226,6 +226,12 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 5,
+        overflow: 'hidden', // 이미지가 원형 밖으로 나가지 않도록
+    },
+    rankingAvatarImage: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
     },
     rankingAvatarText: {
         color: '#fff',
@@ -372,6 +378,12 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 15,
+        overflow: 'hidden', // 이미지가 원형 밖으로 나가지 않도록
+    },
+    profileAvatarImage: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
     },
     profileName: {
         fontSize: 24,

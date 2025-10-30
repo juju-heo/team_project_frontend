@@ -109,38 +109,43 @@ export default function ProfileScreen() {
                                     <Text style={styles.statText}>42</Text>
                                 </View>
                             </View>
-                            <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
-                                <View style={[styles.tagsContainer, { flex: 1 }]}>
-                                    {(() => {
-                                        const displayCount = keywordsExpanded ? myKeywords.length : Math.min(myKeywords.length, 4);
-                                        const keywordsToShow = myKeywords.slice(0, displayCount);
-                                        
-                                        return keywordsToShow.map((keyword, index) => (
-                                            <View key={index} style={styles.tag}>
-                                                <Text style={styles.tagText}>{keyword}</Text>
-                                            </View>
-                                        ));
-                                    })()}
-                                </View>
-                                {myKeywords.length > 4 && (
-                                    <TouchableOpacity 
-                                        onPress={() => setKeywordsExpanded(!keywordsExpanded)}
-                                        style={{ marginLeft: 8, alignSelf: 'flex-start', paddingTop: 3 }}
-                                    >
-                                        <Ionicons 
-                                            name={keywordsExpanded ? "chevron-up" : "chevron-down"} 
-                                            size={18} 
-                                            color="#4CAF50" 
-                                        />
-                                    </TouchableOpacity>
-                                )}
-                            </View>
+                        </View>
+                        <TouchableOpacity style={styles.editButton} onPress={() => router.push('/profile-edit')}>
+                            <Ionicons name="pencil" size={20} color="#4CAF50" />
+                            <Text style={styles.editButtonText}>편집</Text>
+                        </TouchableOpacity>
+                    </View>
+                    
+                    {/* 사주 키워드 - 프로필 카드 전체 너비로 확장 */}
+                    <View style={{ width: '100%', marginTop: 15 }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                            <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#333' }}>사주 키워드</Text>
+                            {myKeywords.length > 4 && (
+                                <TouchableOpacity 
+                                    onPress={() => setKeywordsExpanded(!keywordsExpanded)}
+                                    style={{ marginLeft: 'auto', paddingLeft: 8 }}
+                                >
+                                    <Ionicons 
+                                        name={keywordsExpanded ? "chevron-up" : "chevron-down"} 
+                                        size={20} 
+                                        color="#4CAF50" 
+                                    />
+                                </TouchableOpacity>
+                            )}
+                        </View>
+                        <View style={styles.tagsContainer}>
+                            {(() => {
+                                const displayCount = keywordsExpanded ? myKeywords.length : Math.min(myKeywords.length, 4);
+                                const keywordsToShow = myKeywords.slice(0, displayCount);
+                                
+                                return keywordsToShow.map((keyword, index) => (
+                                    <View key={index} style={styles.tag}>
+                                        <Text style={styles.tagText} numberOfLines={1}>{keyword}</Text>
+                                    </View>
+                                ));
+                            })()}
                         </View>
                     </View>
-                    <TouchableOpacity style={styles.editButton} onPress={() => router.push('/profile-edit')}>
-                        <Ionicons name="pencil" size={20} color="#4CAF50" />
-                        <Text style={styles.editButtonText}>편집</Text>
-                    </TouchableOpacity>
                 </View>
 
                 {/* 친구 목록 섹션 */}
