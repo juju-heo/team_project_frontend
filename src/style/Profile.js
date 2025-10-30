@@ -39,9 +39,7 @@ const styles = StyleSheet.create({
 
     // 프로필 카드 스타일
     profileCard: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
+        flexDirection: 'column', // 세로 방향으로 변경하여 사주 키워드가 전체 너비를 사용할 수 있도록
         backgroundColor: 'white',
         borderRadius: 12,
         padding: 20,
@@ -55,7 +53,8 @@ const styles = StyleSheet.create({
     },
     profileLeft: {
         flexDirection: 'row',
-        flex: 1,
+        alignItems: 'flex-start',
+        marginBottom: 0, // 사주 키워드와의 간격은 사주 키워드 영역의 marginTop으로 조정
     },
     profileImage: {
         width: 80,
@@ -68,6 +67,7 @@ const styles = StyleSheet.create({
     },
     profileInfo: {
         flex: 1,
+        marginRight: 10, // 편집 버튼과의 간격
     },
     userName: {
         fontSize: 20,
@@ -98,19 +98,27 @@ const styles = StyleSheet.create({
     tagsContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
+        width: '100%',
     },
     tag: {
-        backgroundColor: '#E8F5E8',
+        backgroundColor: '#fff', // 흰색 배경 (전체 하트 랭킹 프로필과 동일)
+        borderWidth: 1, // 테두리 추가
+        borderColor: '#4CAF50', // 녹색 테두리
         borderRadius: 15,
-        paddingHorizontal: 12,
+        paddingHorizontal: 8, // 패딩 적절히 설정
         paddingVertical: 6,
-        marginRight: 8,
-        marginBottom: 5,
+        marginRight: 4, // 마진
+        marginBottom: 8,
+        width: '23%', // 한 줄에 4개씩 표시되도록 고정 너비 설정 (23% * 4 = 92%, 나머지 8%는 간격)
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: 30, // 최소 높이 설정
     },
     tagText: {
-        fontSize: 12,
+        fontSize: 12, // 폰트 크기 증가하여 가독성 향상
         color: '#4CAF50',
         fontWeight: '500',
+        textAlign: 'center',
     },
     editButton: {
         flexDirection: 'row',

@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, TextInput, ScrollView, KeyboardAvoidingView, Platform, Image, Modal, Alert, SafeAreaView } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, TouchableOpacity, TextInput, ScrollView, KeyboardAvoidingView, Platform, Image, Modal, Alert, Keyboard } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, AntDesign } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -52,6 +53,12 @@ export default function ChatRoomScreen() {
     // 메시지 입력 상태
     const [messageText, setMessageText] = useState('');
     
+    // ScrollView 참조 (키보드가 올라올 때 스크롤하기 위해)
+    const scrollViewRef = useRef<ScrollView>(null);
+    
+    // TextInput 참조 (키보드 이벤트 처리)
+    const textInputRef = useRef<TextInput>(null);
+    
     // 사진 선택 모달 상태
     const [showImageModal, setShowImageModal] = useState(false);
     
@@ -95,6 +102,16 @@ export default function ChatRoomScreen() {
         setShowTopicModal(false);
     };
 
+    // 프로필 모달 열기 핸들러 (키보드도 함께 닫음)
+    const handleOpenProfile = () => {
+        // 키보드 닫기
+        Keyboard.dismiss();
+        // 프로필 모달 열기
+        setIsHeartLiked(false);
+        setIsFriendAdded(true);
+        setShowProfileModal(true);
+    };
+    
     // 나가기 확인 모달 핸들러들
     const handleExitChat = () => {
         if (isRandom) {
@@ -168,7 +185,44 @@ export default function ChatRoomScreen() {
         
         setMessages([...messages, newMessage]);
         setMessageText('');
+        
+        // 전송 후 스크롤을 맨 아래로 이동 (키보드는 유지)
+        setTimeout(() => {
+            scrollViewRef.current?.scrollToEnd({ animated: true });
+        }, 100);
     };
+    
+    // 키보드가 올라올 때 스크롤 처리
+    useEffect(() => {
+        const keyboardDidShowListener = Keyboard.addListener(
+            Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+            () => {
+                // 키보드가 올라올 때 ScrollView를 맨 아래로 스크롤
+                setTimeout(() => {
+                    scrollViewRef.current?.scrollToEnd({ animated: true });
+                }, 100);
+            }
+        );
+        
+        const keyboardDidHideListener = Keyboard.addListener(
+            Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+            () => {
+                // 키보드가 내려갈 때는 처리하지 않음
+            }
+        );
+        
+        return () => {
+            keyboardDidShowListener.remove();
+            keyboardDidHideListener.remove();
+        };
+    }, []);
+    
+    // 메시지가 추가될 때마다 스크롤을 맨 아래로 이동
+    useEffect(() => {
+        setTimeout(() => {
+            scrollViewRef.current?.scrollToEnd({ animated: true });
+        }, 100);
+    }, [messages]);
     
     // 궁합도 등급 계산
     const getCompatibilityRating = (score: number) => {
@@ -262,12 +316,12 @@ export default function ChatRoomScreen() {
     };
 
     return (
+        <SafeAreaView style={{ flex: 1 }} edges={['top']}>
         <KeyboardAvoidingView 
             style={styles.container}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            keyboardVerticalOffset={0}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
         >
-        <SafeAreaView style={{ flex: 1 }} edges={['bottom']}>
             {/* 상단 헤더 */}
             <View style={styles.header}>
                 <TouchableOpacity 
@@ -292,11 +346,7 @@ export default function ChatRoomScreen() {
                 
                 <TouchableOpacity 
                     style={styles.headerCenter}
-                    onPress={() => {
-                        setIsHeartLiked(false);
-                        setIsFriendAdded(true);
-                        setShowProfileModal(true);
-                    }}
+                    onPress={handleOpenProfile}
                 >
                     <View style={styles.headerAvatar}>
                         <Text style={styles.headerAvatarText}>{userAvatar}</Text>
@@ -325,8 +375,11 @@ export default function ChatRoomScreen() {
 
             {/* 채팅 메시지 영역 */}
             <ScrollView 
+                ref={scrollViewRef}
                 style={styles.messagesContainer}
                 contentContainerStyle={styles.messagesContent}
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={true}
             >
                 {/* 랜덤 채팅일 때만 사주 궁합도 카드 표시 */}
                 {isRandom && (
@@ -390,11 +443,7 @@ export default function ChatRoomScreen() {
                         {!message.isMine && (
                             <TouchableOpacity 
                                 style={styles.messageAvatar}
-                                onPress={() => {
-                                    setIsHeartLiked(false);
-                                    setIsFriendAdded(true);
-                                    setShowProfileModal(true);
-                                }}
+                                onPress={handleOpenProfile}
                             >
                                 <Text style={styles.messageAvatarText}>{userAvatar}</Text>
                             </TouchableOpacity>
@@ -480,12 +529,19 @@ export default function ChatRoomScreen() {
                 
                 <View style={styles.textInputWrapper}>
                     <TextInput
+                        ref={textInputRef}
                         style={styles.textInput}
                         placeholder="메시지를 입력하세요..."
                         placeholderTextColor="#999"
                         value={messageText}
                         onChangeText={setMessageText}
                         multiline
+                        onFocus={() => {
+                            // TextInput에 포커스가 갈 때 스크롤을 맨 아래로 이동
+                            setTimeout(() => {
+                                scrollViewRef.current?.scrollToEnd({ animated: true });
+                            }, 100);
+                        }}
                     />
                 </View>
                 
@@ -540,17 +596,17 @@ export default function ChatRoomScreen() {
             </Modal>
 
             {/* 친구 프로필 모달 */}
-            {showProfileModal && (
+            <Modal
+                visible={showProfileModal}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setShowProfileModal(false)}
+            >
                 <View style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
+                    flex: 1,
                     backgroundColor: 'rgba(0, 0, 0, 0.5)',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    zIndex: 1000,
                 }}>
                     <View style={{
                         backgroundColor: '#fff',
@@ -575,7 +631,10 @@ export default function ChatRoomScreen() {
                                 color: '#333',
                             }}>프로필</Text>
                             <TouchableOpacity 
-                                onPress={() => setShowProfileModal(false)}
+                                onPress={() => {
+                                    setShowProfileModal(false);
+                                    // 모달 닫을 때는 키보드를 다시 열지 않음
+                                }}
                                 style={{ padding: 5 }}
                             >
                                 <Ionicons name="close" size={24} color="#333" />
@@ -796,7 +855,7 @@ export default function ChatRoomScreen() {
                         </View>
                     </View>
                 </View>
-            )}
+            </Modal>
 
             {/* 이미지 확대 모달 */}
             <ImageModal
@@ -894,8 +953,8 @@ export default function ChatRoomScreen() {
                     </View>
                 </Modal>
             )}
-        </SafeAreaView>
         </KeyboardAvoidingView>
+        </SafeAreaView>
     );
 }
 
